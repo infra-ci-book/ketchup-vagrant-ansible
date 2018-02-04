@@ -1,0 +1,21 @@
+---
+- name: include task specific variables
+  include_vars: '{{ item }}'
+  with_first_found:
+    - files:
+        - '{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml'
+        - '{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml'
+        - '{{ ansible_distribution }}.yml'
+        - '{{ ansible_os_family }}.yml'
+        - 'default.yml'
+      paths: '../vars'
+
+- block:
+  - name: Install yum repositories
+    copy:
+      src: '{{ item }}'
+      dest: '/etc/yum.repos.d/{{ item }}'
+    with_items: "{{ yum_online_repo_files }}"
+
+  become: True
+

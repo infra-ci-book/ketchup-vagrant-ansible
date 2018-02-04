@@ -1,0 +1,11 @@
+[Unit]
+Description=Start Ketchup
+After=network.service
+
+[Service]
+Environment="LC_ALL=en_US.UTF-8"
+ExecStart={{ ketchup_home }}/ketchup start
+WorkingDirectory={{ ketchup_home }}
+User=root
+Restart=always
+KillSignal=SIGINT

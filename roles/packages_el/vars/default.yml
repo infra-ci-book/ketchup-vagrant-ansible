@@ -1,0 +1,10 @@
+---
+yum_common_packages:
+  - git
+  - libsemanage-python
+  - mlocate
+  - net-tools
+  - yum-utils
+
+yum_nginx_packages:
+  - nginx

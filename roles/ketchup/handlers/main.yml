@@ -1,0 +1,7 @@
+---
+- name: restart ketchup
+  service:
+    name: "{{ ketchup_init_name }}"
+    enabled: yes
+    state: restarted
+  become: True

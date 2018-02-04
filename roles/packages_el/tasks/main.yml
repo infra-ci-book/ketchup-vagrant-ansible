@@ -1,0 +1,26 @@
+---
+- name: include task specific variables
+  include_vars: '{{ item }}'
+  with_first_found:
+    - files:
+        - '{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml'
+        - '{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml'
+        - '{{ ansible_distribution }}.yml'
+        - '{{ ansible_os_family }}.yml'
+        - 'default.yml'
+      paths: '../vars'
+
+- block:
+  - name: Install common packages
+    yum:
+      name: '{{ item }}'
+      state: installed
+    with_items: '{{ yum_common_packages }}'
+
+  - name: Install nginx packages
+    yum:
+      name: '{{ item }}'
+      state: installed
+    with_items: '{{ yum_nginx_packages }}'
+    when: 'packages_el_nginx_packages == True'
+  become: True

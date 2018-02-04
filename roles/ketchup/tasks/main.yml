@@ -1,0 +1,45 @@
+---
+- name: include task specific variables
+  include_vars: '{{ item }}'
+  with_first_found:
+    - files:
+        - '{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml'
+        - '{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml'
+        - '{{ ansible_distribution }}.yml'
+        - '{{ ansible_os_family }}.yml'
+        - 'default.yml'
+      paths: '../vars'
+
+- block:
+  - name: Create ketchup home directory
+    file:
+      path: '{{ ketchup_home }}'
+      state: directory
+      mode: 0755
+      
+  - name: Download ketchup app and contents from github
+    git:
+      repo: '{{ ketchup_repos }}'
+      dest: '{{ ketchup_home }}/app-contents'
+    ignore_errors: True
+
+  - name: Extract ketchup app
+    command: tar zxf '{{ ketchup_app_path }}'
+    args:
+      chdir: '{{ ketchup_home }}'
+
+  - name: Install ketchup configuration file
+    template:
+      src: 'config.json.j2'
+      dest: '{{ ketchup_home }}/config.json'
+    notify:
+      - restart ketchup
+
+  - name: Install bootstrap for systemd
+    template:
+      src: 'ketchup.service.j2'
+      dest: '{{ ketchup_bootstrap_path }}'
+    notify:
+      - restart ketchup
+
+  become: True

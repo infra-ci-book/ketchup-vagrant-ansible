@@ -1,0 +1,3 @@
+---
+ketchup_bootstrap_path: /etc/systemd/system/ketchup.service
+ketchup_init_name: ketchup.service
