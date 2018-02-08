@@ -12,5 +12,6 @@
       when: 'ansible_os_family == "RedHat"'
 
     - role: nginx_backend
+      when: 'use_nginx_proxy|bool'
 
     - role: ketchup
