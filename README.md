@@ -2,19 +2,58 @@
 
 ketchup-vagrant-ansible is a playbook what is able to deply ketchup CMS and Nginx frontend.
 
-## How to launch this playbook
+## Requirements
 
-You can follow the following steps to deploy ketchup and Nginx at the same time:
+- Ansible >= 2.4.0.0
+- CentOS >= 7.4
+
+---
+
+CentOS:
+
+```
+yum -y update
+yum -y install ansible
+reboot
+```
+
+## How to launch a playbook:
+
+### 1. You can follow the following steps to deploy ketchup and Nginx at the same time:
 
 ```
 $ ansible-playbook -i hosts/ketchup/inventory ketchup.yml
 ```
 
+### 2. You can create and boot a server instance:
+
+```
+$ ansible-playbook -i hosts/ketchup/inventory -e 'instance_name=FOO' -e 'instance_action=start' instance.yml
+```
+
+### 3. You can shutdown a server instance:
+
+```
+$ ansible-playbook -i hosts/ketchup/inventory -e 'instance_name=FOO' -e 'instance_action=stop' instance.yml
+```
+
+### 4. You can terminate a server instance:
+
+```
+$ ansible-playbook -i hosts/ketchup/inventory -e 'instance_name=FOO' -e 'instance_action=terminate' instance.yml
+```
+
+
 ## How to configuration this playbook
+
+### Inventory Variables
 
 You can modify the following parameters in the inventory(`hosts/ketchup/inventory`) file:
 
 ```
+[vagrant]
+127.0.0.1
+
 [ketchup]
 192.168.33.12        # IPAddress or hostname of your ketchup server
 
@@ -25,6 +64,12 @@ You can modify the following parameters in the inventory(`hosts/ketchup/inventor
 [all:vars]
 ketchup_host=192.168.33.12        # IPAddress or hostname of your ketchup CMS
 ketchup_port=80                   # Port number of your ketchup CMS
+
+[vagrant:vars]
+ansible_connection=local
+instance_provider=vagrant         # You can specify a provider name like 'vagrant'
+instance_name=''                  # A name of your target server instance on your IaaS
+instance_action=''                # Choose an action from start, stop, and terminate.
 
 [ketchup:vars]
 ansible_ssh_user=vagrant
@@ -49,3 +94,19 @@ use_nginx_proxy=True
 
 nginx_http_port=80
 ```
+
+## Dependencies
+
+None.
+
+## Installation
+
+This assumes that you've installed the base dependencies and you're running on CentOS.
+
+```
+git clone https://github.com/infra-ci-book/ketchup-vagrant-ansible
+```
+
+## License
+
+Apache-2.0
