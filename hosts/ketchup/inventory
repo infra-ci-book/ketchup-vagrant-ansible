@@ -1,3 +1,6 @@
+[vagrant]
+127.0.0.1
+
 [ketchup]
 192.168.33.12
 
@@ -8,6 +11,14 @@
 [all:vars]
 ketchup_host=192.168.33.12
 ketchup_port=80
+
+[vagrant:vars]
+ansible_connection=local
+instance_provider=vagrant
+instance_name=''
+instance_action=''
+
+vagrant_basedir=~/vagrant/infraci
 
 [ketchup:vars]
 ansible_ssh_user=vagrant

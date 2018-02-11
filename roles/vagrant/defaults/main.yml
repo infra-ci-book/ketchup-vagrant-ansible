@@ -1,0 +1,5 @@
+---
+instance_status:
+  start: 'up'
+  stop: 'halt'
+  terminate: 'destroy'
