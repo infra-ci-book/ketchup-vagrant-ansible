@@ -15,7 +15,22 @@
     copy:
       src: '{{ item }}'
       dest: '/etc/yum.repos.d/{{ item }}'
-    with_items: "{{ yum_online_repo_files }}"
+    with_items: '{{ yum_online_repo_files }}'
+
+  - block:
+    - name: Enable epel repository
+      ini_file:
+        dest: /etc/yum.repos.d/epel-7.repo
+        section: epel
+        option: enabled
+        value: 1
+    - name: Disable officuial Nginx repository
+      ini_file:
+        dest: /etc/yum.repos.d/nginx-centos-7.repo
+        section: nginx
+        option: enabled
+        value: 0
+    when: 'use_epel_repo|bool'
 
   become: True
 

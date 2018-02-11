@@ -19,6 +19,12 @@
     with_items:
       - httpd_can_network_connect
 
+  - name: Install nginx.conf for Nginx
+    copy:
+      src: nginx.conf
+      dest: /etc/nginx/nginx.conf
+      backup: yes
+
   - name: Disable default.conf for Ngnix
     command: mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.org
     ignore_errors: True
