@@ -1,0 +1,6 @@
+---
+- name: 'vagrant {{ instance_status[instance_action] }} {{ instance_name }}'
+  shell: 'vagrant {{ instance_status[instance_action] }} {{ instance_name }}'
+  args:
+    chdir: '{{ vagrant_basedir }}'
+  when: 'instance_action in instance_status'
