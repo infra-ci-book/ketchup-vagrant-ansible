@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 IMAGE="centos:centos7"
 KETCHUP_NAME=$(uuidgen)
 KETCHUP_NGINX_NAME=$(uuidgen)
