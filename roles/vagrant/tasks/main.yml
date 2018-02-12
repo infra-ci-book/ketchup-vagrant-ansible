@@ -1,6 +1,6 @@
 ---
 - name: 'vagrant {{ instance_status[instance_action] }} {{ instance_name }}'
-  shell: 'vagrant {{ instance_status[instance_action] }} {{ instance_name }}'
+  shell: 'test "{{ instance_status[instance_action] }}" = "up" && vagrant {{ instance_status[instance_action] }} {{ instance_name }} || vagrant {{ instance_status[instance_action] }} -f {{ instance_name }}'
   args:
     chdir: '{{ vagrant_basedir }}'
   when: 'instance_action in instance_status'
