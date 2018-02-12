@@ -24,7 +24,7 @@
       state: True
     with_items:
       - httpd_can_network_connect
-    when:  result|success and result.stdout.lower() != "disabled"
+    when: 'result|success and result.stdout.lower() != "disabled"'
 
   - name: Install nginx.conf for Nginx
     copy:
