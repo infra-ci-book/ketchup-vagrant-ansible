@@ -1,0 +1,11 @@
+---
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - sudo apt-get update -qq
+
+script:
+  - ./tests/test_ketchup.sh

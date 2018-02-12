@@ -1,6 +1,7 @@
 ---
 yum_common_packages:
   - git
+  - libselinux-python
   - libsemanage-python
   - mlocate
   - net-tools
