@@ -11,13 +11,20 @@
       paths: '../vars'
 
 - block:
-  - name: Grant selinux permission for Ngnix.
+  - name: Ensure that selinux is enabled
+    command: getenforce
+    register: result
+    ignore_errors: true
+    changed_when: false
+
+  - name: Grant selinux permission for Ngnix
     seboolean:
       name: '{{item}}'
       persistent: yes
       state: True
     with_items:
       - httpd_can_network_connect
+    when:  result|success and result.stdout.lower() != "disabled"
 
   - name: Install nginx.conf for Nginx
     copy:
