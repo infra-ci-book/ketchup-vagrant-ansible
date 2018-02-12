@@ -1,0 +1,10 @@
+---
+- import_playbook: instance.yml
+  vars:
+    instance_name: ketchup
+    instance_action: start
+- import_playbook: instance.yml
+  vars:
+    instance_name: ketchup-nginx
+    instance_action: start
+- import_playbook: ketchup.yml
