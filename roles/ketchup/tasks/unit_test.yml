@@ -1,0 +1,88 @@
+---
+- name: include task specific variables
+  include_vars: '{{ item }}'
+  with_first_found:
+    - files:
+        - '{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml'
+        - '{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml'
+        - '{{ ansible_distribution }}.yml'
+        - '{{ ansible_os_family }}.yml'
+        - 'default.yml'
+      paths: '../vars'
+
+- block:
+  - name: Check ketchup home and contents
+    wait_for:
+      path: "{{ ketchup_home }}/app-contents/README.md"
+      timeout: 5
+      msg: "Check ketchup home and git clone"
+  
+  - name: Gathering status for git
+    command: git diff origin/master
+    args:
+      chdir: "{{ ketchup_home }}/app-contents"
+    changed_when: false
+    register: test_ketchup_git
+
+  - name: Check git contents are identical
+    assert:
+      that:
+        - '"---" not in test_ketchup_git.stdout'
+      msg: "Ketchup Application is differ from repo {{ test_ketchup_git.stdout }}" 
+
+  - name: Check differences from archive
+    command: tar dfz '{{ ketchup_app_path }}'
+    args:
+      warn: false
+      chdir: '{{ ketchup_home }}'
+    changed_when: false
+    register: test_ketchup_archive
+
+  - name: Diff ketchup configuration file
+    template:
+      src: 'config.json.j2'
+      dest: '{{ ketchup_home }}/config.json'
+    check_mode: true
+    diff: true
+    register: test_ketchup_conf
+
+  - name: Check ketchup configuration file
+    assert:
+      that:
+        - "test_ketchup_conf.changed|bool == 0"
+      msg: "ketchup configuration is differ from templates. {{ test_ketchup_conf.diff|default('') }}"
+
+  - name: Diff bootstrap for systemd
+    template:
+      src: 'ketchup.service.j2'
+      dest: '{{ ketchup_bootstrap_path }}'
+    check_mode: true
+    diff: true
+    register: test_bootstrap_conf
+
+  - name: Check bootstrap file
+    assert:
+      that:
+        - "test_bootstrap_conf.changed|bool == 0"
+      msg: "ketchup configuration is differ from templates. {{ test_bootstrap_conf.diff|default('') }}"
+
+  - name: Gathering ketchup status info
+    service:
+      name: "{{ ketchup_init_name }}"
+      enabled: yes
+      state: started
+    check_mode: true
+    register: test_ketchup_status
+
+  - name: Check ketchup status
+    assert:
+      that:
+        - "test_ketchup_status.changed|bool == 0"
+      msg: "ketchup is not active."
+
+  - name: Check ketchup port
+    wait_for:
+      port: "{{ ketchup_port }}"
+      msg: "ketchup is not active."
+
+  become: True

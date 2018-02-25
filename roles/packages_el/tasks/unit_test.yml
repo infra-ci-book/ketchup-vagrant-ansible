@@ -1,0 +1,42 @@
+---
+- name: include task specific variables
+  include_vars: '{{ item }}'
+  with_first_found:
+    - files:
+        - '{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml'
+        - '{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml'
+        - '{{ ansible_distribution }}.yml'
+        - '{{ ansible_os_family }}.yml'
+        - 'default.yml'
+      paths: '../vars'
+
+- block:
+  - name: Gathering status of installed common packages
+    yum:
+      name: '{{ item }}'
+      state: installed
+    with_items: '{{ yum_common_packages }}'
+    check_mode: true
+    register: test_installed_common_packages
+
+  - name: Check installed common packages
+    assert:
+      that:
+        - "test_installed_common_packages.changed|bool == 0"
+      msg: "Uninstalled following packages. {{ test_installed_common_packages.results.0.changes|default('') }}"
+
+  - name: Gathering status of nginx packages
+    yum:
+      name: '{{ item }}'
+      state: installed
+    with_items: '{{ yum_nginx_packages }}'
+    check_mode: true
+    register: test_installed_nginx_packages
+
+  - name: Check installed nginx packages
+    assert:
+      that:
+        - "test_installed_nginx_packages.changed|bool == 0"
+      msg: "Uninstalled following packages. {{ test_installed_nginx_packages.results.0.changes|default('') }}"
+
+  become: True

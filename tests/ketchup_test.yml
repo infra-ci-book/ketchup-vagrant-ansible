@@ -1,0 +1,47 @@
+---
+- name: Test Ketchup roles
+  hosts: ketchup
+  become: True
+
+  pre_tasks:
+    - name: Remove the .dockerenv file so GitLab Omnibus doesn't get confused.
+      file:
+        path: /.dockerenv
+        state: absent
+
+#  roles:
+#    - role: repos_el
+#      when: 'ansible_os_family == "RedHat"'
+#
+#    - role: packages_el
+#      packages_el_nginx_packages: True
+#      when: 'ansible_os_family == "RedHat"'
+#
+#    - role: nginx
+#      when: 'use_nginx_proxy|bool'
+#
+#    - role: ketchup
+
+  tasks:
+    - name: Unit Test for repos_el role
+      include_role:
+        name: repos_el
+        tasks_from: unit_test
+      when: 'ansible_os_family == "RedHat"'
+
+    - name: Unit Test for packages_el role
+      include_role:
+        name: packages_el
+        tasks_from: unit_test
+      when: 'ansible_os_family == "RedHat"'
+
+#    - name: Unit Test for nginx role
+#      include_role:
+#        name: nginx
+#        tasks_from: unit_test
+#      when: 'use_nginx_proxy|bool'
+
+    - name: Unit Test for ketchup role
+      include_role:
+        name: ketchup
+        tasks_from: unit_test
