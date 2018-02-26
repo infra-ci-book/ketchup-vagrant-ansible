@@ -1,0 +1,73 @@
+---
+- name: include task specific variables
+  include_vars: '{{ item }}'
+  with_first_found:
+    - files:
+        - '{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml'
+        - '{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml'
+        - '{{ ansible_distribution }}.yml'
+        - '{{ ansible_os_family }}.yml'
+        - 'default.yml'
+      paths: '../vars'
+
+- block:
+  - name: Ensure that selinux is enabled
+    command: getenforce
+    register: test_getenforce
+    ignore_errors: true
+    changed_when: false
+
+  - name: Getting selinux permission for Ngnix
+    command: getsebool httpd_can_network_connect
+    register: test_getsebool
+    ignore_errors: true
+    changed_when: false
+
+  - name: Check selinux permission for Ngnix
+    assert:
+      that:
+        - "'on' in test_getsebool.stdout"
+      msg: "SElinux permission is not set"
+
+  - name: Gathering nginx.conf status
+    copy:
+      src: nginx.conf
+      dest: /etc/nginx/nginx.conf
+    check_mode: true
+    diff: true
+    register: test_nginx_conf
+
+  - name: Check Nginx configuration file
+    assert:
+      that:
+        - "test_nginx_conf.changed|bool == 0"
+      msg: "Nginx configuration is differ from templates. {{ test_nginx_conf.diff|default('') }}"
+
+  - name: Check disable default.conf for Ngnix
+    wait_for:
+      path: /etc/nginx/conf.d/default.conf
+      state: absent
+      timeout: 5
+
+  - name: DryRun install ketchup.conf for Ngnix
+    template:
+      src: 'ketchup.conf.j2'
+      dest: '{{ nginx_conf_dir }}/ketchup.conf'
+    check_mode: true
+    diff: true
+    register: test_nginx_ketchup_conf
+
+  - name: Check ketchup.conf for Ngnix
+    assert:
+      that:
+        - "test_nginx_ketchup_conf.changed|bool == 0"
+      msg: "ketchup.conf is differ from templates. {{ test_nginx_ketchup_conf.diff|default('') }}"
+
+  - name: Check Nginx port
+    wait_for:
+      host: localhost
+      port: "{{ nginx_http_port }}"
+      timeout: 120
+
+  become: true
+
