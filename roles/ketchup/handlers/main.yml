@@ -1,6 +1,6 @@
 ---
 - name: restart ketchup
-  service:
+  systemd:
     name: "{{ ketchup_init_name }}"
     enabled: yes
     state: restarted

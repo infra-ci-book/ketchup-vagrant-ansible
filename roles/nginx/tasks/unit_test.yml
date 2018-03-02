@@ -26,7 +26,7 @@
   - name: Check selinux permission for Ngnix
     assert:
       that:
-        - "'on' in test_getsebool.stdout"
+        - "'on' in test_getsebool.stdout|default('on')"
       msg: "SElinux permission is not set"
 
   - name: Gathering nginx.conf status

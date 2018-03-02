@@ -17,27 +17,11 @@
       timeout: 5
     with_items: '{{ yum_online_repo_files }}'
 
-#  - name: Check contents for repo files
-#    copy:
-#      src: '{{ item }}'
-#      dest: '/etc/yum.repos.d/{{ item }}'
-#    with_items: '{{ yum_online_repo_files }}'
-#    check_mode: true
-#    diff: true
-#    register: test_repo_files
-#    when: "use_epel_repo|bool == 0"
-#
-#  - name: Check difference from repo files
-#    assert:
-#      that:
-#        - "item.changed != 1"
-#      msg: "{{ item.diff.0.after_header }} and {{ item.diff.0.before_header }} are not identical"
-#    with_items: "{{ test_repo_files.results }}"
-
   - name: Gathaering registered repos
     command: yum repolist
     args:
       warn: no
+    changed_when: false
     register: test_registered_repos
 
   - name: Check registration for epel repo

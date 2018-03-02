@@ -1,6 +1,6 @@
 ---
 - name: restart nginx
-  service:
+  systemd:
     name: "{{ nginx_init_name }}"
     state: restarted
   become: True
