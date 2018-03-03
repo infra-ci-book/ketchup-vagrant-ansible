@@ -24,6 +24,9 @@ ketchup_test:
     CONTAINER_NAME: "ketchup"
     RUNNER_HOST_IP: "10.0.50.31"
     CONTAINER_PORT: 8080
+
+  before_script:
+   - docker rm -f ${CONTAINER_NAME} ||true
   script:
    - docker run --detach --privileged --name ${CONTAINER_NAME} -p ${CONTAINER_PORT}:${CONTAINER_PORT} ${CONTAINER_IMAGE_PATH} /sbin/init
    - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory ./${CONTAINER_NAME}.yml --syntax-check"
