@@ -33,7 +33,7 @@ ketchup_test:
    - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${CONTAINER_NAME} ./${CONTAINER_NAME}.yml"
    - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${CONTAINER_NAME}_test.yml --syntax-check"
    - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${CONTAINER_NAME}_test.yml -vv"
-"
+
   environment:
     name: review/${CI_COMMIT_REF_NAME}
     url: http://${RUNNER_HOST_IP}:${CONTAINER_PORT}/admin
