@@ -2,6 +2,7 @@
 stages:
  - build
  - test
+ - review
 # - deploy
 
 variables:
@@ -21,14 +22,21 @@ ketchup_test:
   stage: test
   variables:
     CONTAINER_NAME: "ketchup"
+    RUNNER_HOST_IP: "10.0.50.31"
+    CONTAINER_PORT: 8080
   script:
-   - docker run --detach --privileged --name ${CONTAINER_NAME} -p 8080:8080 ${CONTAINER_IMAGE_PATH} /sbin/init
+   - docker run --detach --privileged --name ${CONTAINER_NAME} -p ${CONTAINER_PORT}:${CONTAINER_PORT} ${CONTAINER_IMAGE_PATH} /sbin/init
    - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory ./${CONTAINER_NAME}.yml --syntax-check"
    - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${CONTAINER_NAME} ./${CONTAINER_NAME}.yml"
    - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${CONTAINER_NAME}_test.yml --syntax-check"
    - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${CONTAINER_NAME}_test.yml -vv"
-  after_script:
-   - docker rm -f ${CONTAINER_NAME}
+"
+  environment:
+    name: review/${CI_COMMIT_REF_NAME}
+    url: http://${RUNNER_HOST_IP}:${CONTAINER_PORT}/admin
+    on_stop: review_stop
+#  after_script:
+#   - docker rm -f ${CONTAINER_NAME}
 #   - docker rmi -f ${CONTAINER_IMAGE_PATH}
   tags:
    - docker
@@ -45,5 +53,19 @@ ketchup_nginx_test:
    - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${CONTAINER_NAME}_test.yml -vv"
   after_script:
    - docker rm -f ${CONTAINER_NAME}
+  tags:
+   - docker
+
+review_stop:
+  stage: review
+  variables:
+    GIT_STRATEGY: none
+    CONTAINER_NAME: "ketchup"
+  script:
+    - docker rm -f ${CONTAINER_NAME}
+  when: manual
+  environment:
+    name: review/${CI_COMMIT_REF_NAME}
+    action: stop
   tags:
    - docker
