@@ -35,12 +35,11 @@ $ ansible-playbook -i ../hosts/ketchup/inventory ketchup_nginx_test.yml
 1. Access to `http://192.168.33.10` or `http://[your host ip address]` and login as your account
 2. Create New Project and import project from `https://github.com/infra-ci-book/ketchup-vagrant-ansible`    
 
-
-    ![](https://raw.githubusercontent.com/infra-ci-book/ketchup-vagrant-ansible/master/tests/images/01.png)
+    ![](https://github.com/infra-ci-book/ketchup-vagrant-ansible/raw/master/tests/images/01.JPG)
 
 3. Check project import successfully
 
-    ![](https://raw.githubusercontent.com/infra-ci-book/ketchup-vagrant-ansible/master/tests/images/02.png)
+    ![](https://github.com/infra-ci-book/ketchup-vagrant-ansible/raw/master/tests/images/02.JPG)
 
 ### 2. Setup config for insecure docker registry:
 1. Access to GitLab Runner host
