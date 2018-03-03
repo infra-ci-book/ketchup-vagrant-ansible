@@ -1,0 +1,50 @@
+---
+# image: ansible/centos7-ansible
+stages:
+ - build
+ - test
+ - deploy
+
+variables:
+  CONTAINER_IMAGE: c7-systemd
+  CONTAINER_IMAGE_PATH: ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CONTAINER_IMAGE}
+
+pkg_build:
+  stage: build
+  script:
+   - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
+   - docker build . -t ${CONTAINER_IMAGE_PATH}
+   - docker push ${CONTAINER_IMAGE_PATH}
+  tags:
+   - docker
+
+ketchup_test:
+  stage: test
+  variables:
+    CONTAINER_NAME: "ketchup"
+  script:
+   - docker run --detach --privileged --name ${CONTAINER_NAME} -p 8080:8080 ${CONTAINER_IMAGE_PATH} /sbin/init
+   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory ./${CONTAINER_NAME}.yml --syntax-check"
+   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${CONTAINER_NAME} ./${CONTAINER_NAME}.yml"
+   - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${CONTAINER_NAME}_test.yml --syntax-check"
+   - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${CONTAINER_NAME}_test.yml -vv"
+  after_script:
+   - docker rm -f ${CONTAINER_NAME}
+#   - docker rmi -f ${CONTAINER_IMAGE_PATH}
+  tags:
+   - docker
+
+ketchup_nginx_test:
+  stage: test
+  variables:
+    CONTAINER_NAME: "ketchup_nginx"
+  script:
+   - docker run --detach --privileged --name ${CONTAINER_NAME} -p 80:80 ${CONTAINER_IMAGE_PATH} /sbin/init
+   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory ./${CONTAINER_NAME}.yml --syntax-check"
+   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${CONTAINER_NAME} ./${CONTAINER_NAME}.yml"
+   - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${CONTAINER_NAME}_test.yml --syntax-check"
+   - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${CONTAINER_NAME}_test.yml -vv"
+  after_script:
+   - docker rm -f ${CONTAINER_NAME}
+  tags:
+   - docker
