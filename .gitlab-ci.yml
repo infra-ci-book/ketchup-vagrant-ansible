@@ -22,7 +22,7 @@ ketchup_test:
   stage: test
   variables:
     CONTAINER_NAME: "ketchup"
-    RUNNER_HOST_IP: "10.0.50.31"
+    RUNNER_HOST_IP: "192.168.33.11"
     CONTAINER_PORT: 8080
 
   before_script:
