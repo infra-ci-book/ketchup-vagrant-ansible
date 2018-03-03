@@ -1,9 +1,8 @@
 ---
-# image: ansible/centos7-ansible
 stages:
  - build
  - test
- - deploy
+# - deploy
 
 variables:
   CONTAINER_IMAGE: c7-systemd
@@ -40,8 +39,8 @@ ketchup_nginx_test:
     CONTAINER_NAME: "ketchup_nginx"
   script:
    - docker run --detach --privileged --name ${CONTAINER_NAME} -p 80:80 ${CONTAINER_IMAGE_PATH} /sbin/init
-   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory ./${CONTAINER_NAME}.yml --syntax-check"
-   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${CONTAINER_NAME} ./${CONTAINER_NAME}.yml"
+   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory ./ketchup.yml --syntax-check"
+   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${CONTAINER_NAME} ./ketchup.yml"
    - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${CONTAINER_NAME}_test.yml --syntax-check"
    - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${CONTAINER_NAME}_test.yml -vv"
   after_script:
