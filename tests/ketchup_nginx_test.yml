@@ -1,6 +1,6 @@
 ---
 - name: Test Ketchup roles
-  hosts: ketchup
+  hosts: ketchup_nginx
   become: True
 
   pre_tasks:
@@ -20,8 +20,6 @@
     - role: nginx
       when: 'use_nginx_proxy|bool'
 
-    - role: ketchup
-
   post_tasks:
     - name: Unit Test for repos_el role
       include_role:
@@ -40,8 +38,3 @@
         name: nginx
         tasks_from: unit_test
       when: 'use_nginx_proxy|bool'
-
-    - name: Unit Test for ketchup role
-      include_role:
-        name: ketchup
-        tasks_from: unit_test

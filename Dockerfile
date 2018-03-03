@@ -10,10 +10,6 @@ rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
 rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
 rm -f /lib/systemd/system/basic.target.wants/*;\
 rm -f /lib/systemd/system/anaconda.target.wants/*;\
-export LANG=C;\
-export http_proxy=http://proxy.jpn.hp.com:8080;\
-export https_proxy=http://proxy.jpn.hp.com:8080;\
-export no_proxy=10.0.50.30;\
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7;\
 yum clean all;\
 yum update -y;\
