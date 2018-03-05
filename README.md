@@ -17,7 +17,14 @@ yum -y install ansible
 reboot
 ```
 
-## How to launch a playbook:
+## Lauch everything:
+
+```
+$ ansible-playbook site.yml
+```
+
+
+## How to launch a playbook each operation:
 
 ### 1. You can follow the following steps to deploy ketchup and Nginx at the same time:
 
