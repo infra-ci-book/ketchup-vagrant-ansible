@@ -2,8 +2,7 @@
 stages:
  - build
  - test
- - review
-# - deploy
+ - deploy 
 
 variables:
   CONTAINER_IMAGE: c7-systemd
@@ -12,6 +11,7 @@ variables:
 pkg_build:
   stage: build
   script:
+   - echo ${VAGRANT_PRIVATE_KEY} |tee -a ./private_key
    - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
    - docker build . -t ${CONTAINER_IMAGE_PATH}
    - docker push ${CONTAINER_IMAGE_PATH}
@@ -21,54 +21,48 @@ pkg_build:
 ketchup_test:
   stage: test
   variables:
-    CONTAINER_NAME: "ketchup"
-    RUNNER_HOST_IP: "192.168.33.11"
-    CONTAINER_PORT: 8080
-
-  before_script:
-   - docker rm -f ${CONTAINER_NAME} ||true
+    TARGET_APP: ketchup
+  services:
+   - name: ${CONTAINER_IMAGE_PATH}
+     alias: ${TARGET_APP}
+     entrypoint: ["/sbin/init"]
   script:
-   - docker run --detach --privileged --name ${CONTAINER_NAME} -p ${CONTAINER_PORT}:${CONTAINER_PORT} ${CONTAINER_IMAGE_PATH} /sbin/init
-   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory ./${CONTAINER_NAME}.yml --syntax-check"
-   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${CONTAINER_NAME} ./${CONTAINER_NAME}.yml"
-   - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${CONTAINER_NAME}_test.yml --syntax-check"
-   - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${CONTAINER_NAME}_test.yml -vv"
-
-  environment:
-    name: review/${CI_COMMIT_REF_NAME}
-    url: http://${RUNNER_HOST_IP}:${CONTAINER_PORT}/admin
-    on_stop: review_stop
-#  after_script:
-#   - docker rm -f ${CONTAINER_NAME}
-#   - docker rmi -f ${CONTAINER_IMAGE_PATH}
+   - export CONTAINER_NAME="`hostname`-`echo ${CONTAINER_IMAGE_PATH}|sed -e 's/\//__/g'|sed -e 's/\:[1-9a-z]\+//g'`-0"
+   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory ./${TARGET_APP}.yml --syntax-check"
+   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${TARGET_APP} ./${TARGET_APP}.yml"
+   - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${TARGET_APP}_test.yml --syntax-check"
+   - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${TARGET_APP}_test.yml -vv"
   tags:
    - docker
 
 ketchup_nginx_test:
   stage: test
   variables:
-    CONTAINER_NAME: "ketchup_nginx"
+    TARGET_APP: ketchup_nginx
+  services:
+   - name: ${CONTAINER_IMAGE_PATH}
+     alias: ${TARGET_APP}
+     entrypoint: ["/sbin/init"]
   script:
-   - docker run --detach --privileged --name ${CONTAINER_NAME} -p 80:80 ${CONTAINER_IMAGE_PATH} /sbin/init
+   - export CONTAINER_NAME="`hostname`-`echo ${CONTAINER_IMAGE_PATH}|sed -e 's/\//__/g'|sed -e 's/\:[1-9a-z]\+//g'`-0"
    - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory ./ketchup.yml --syntax-check"
-   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${CONTAINER_NAME} ./ketchup.yml"
-   - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${CONTAINER_NAME}_test.yml --syntax-check"
-   - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${CONTAINER_NAME}_test.yml -vv"
-  after_script:
-   - docker rm -f ${CONTAINER_NAME}
+   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${TARGET_APP} ./ketchup.yml"
+   - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${TARGET_APP}_test.yml --syntax-check"
+   - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${TARGET_APP}_test.yml -vv"
   tags:
    - docker
 
-review_stop:
-  stage: review
+ketchup_deploy:
+  stage: deploy
+  image:
+    name: ${CONTAINER_IMAGE_PATH}
   variables:
-    GIT_STRATEGY: none
-    CONTAINER_NAME: "ketchup"
+    RUNNER_HOST_IP: "192.168.33.12"
+    CONTAINER_PORT: 80
   script:
-    - docker rm -f ${CONTAINER_NAME}
-  when: manual
+   - "ansible-playbook -i ./hosts/ketchup/inventory ./ketchup.yml -vv"
   environment:
     name: review/${CI_COMMIT_REF_NAME}
-    action: stop
+    url: http://${RUNNER_HOST_IP}:${CONTAINER_PORT}/admin
   tags:
    - docker
