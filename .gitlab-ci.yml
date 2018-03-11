@@ -1,68 +1,83 @@
 ---
 stages:
- - build
- - test
- - deploy 
+  - lint
+  - build
+  - test
+  - deploy 
 
 variables:
   CONTAINER_IMAGE: c7-systemd
   CONTAINER_IMAGE_PATH: ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CONTAINER_IMAGE}
 
-pkg_build:
+Lint_Check:
+  stage: lint
+  script:
+    - echo "Lint Check will be executed in this stage"
+  only:
+    - branches
+  except:
+    - master
+  tags:
+    - docker
+
+Pkg_Build:
   stage: build
   script:
-   - echo ${VAGRANT_PRIVATE_KEY} |tee -a ./private_key
-   - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
-   - docker build . -t ${CONTAINER_IMAGE_PATH}
-   - docker push ${CONTAINER_IMAGE_PATH}
+    - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
+    - docker build . -t ${CONTAINER_IMAGE_PATH}
+    - docker push ${CONTAINER_IMAGE_PATH}
   tags:
-   - docker
+    - docker
 
-ketchup_test:
+Ketchup_Test:
   stage: test
   variables:
     TARGET_APP: ketchup
   services:
-   - name: ${CONTAINER_IMAGE_PATH}
-     alias: ${TARGET_APP}
-     entrypoint: ["/sbin/init"]
+    - name: ${CONTAINER_IMAGE_PATH}
+      alias: ${TARGET_APP}
+      entrypoint: ["/sbin/init"]
   script:
-   - export CONTAINER_NAME="`hostname`-`echo ${CONTAINER_IMAGE_PATH}|sed -e 's/\//__/g'|sed -e 's/\:[1-9a-z]\+//g'`-0"
-   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory ./${TARGET_APP}.yml --syntax-check"
-   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${TARGET_APP} ./${TARGET_APP}.yml"
-   - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${TARGET_APP}_test.yml --syntax-check"
-   - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${TARGET_APP}_test.yml -vv"
+    - export CONTAINER_NAME="`hostname`-`echo ${CONTAINER_IMAGE_PATH}|sed -e 's/\//__/g' -e 's/\:[1-9a-z]\+//g'`-0"
+    - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${TARGET_APP} ./${TARGET_APP}.yml"
+    - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${TARGET_APP}_test.yml -vv"
   tags:
-   - docker
+    - docker
 
-ketchup_nginx_test:
+Ketchup_Nginx_Test:
   stage: test
   variables:
     TARGET_APP: ketchup_nginx
   services:
-   - name: ${CONTAINER_IMAGE_PATH}
-     alias: ${TARGET_APP}
-     entrypoint: ["/sbin/init"]
+    - name: ${CONTAINER_IMAGE_PATH}
+      alias: ${TARGET_APP}
+      entrypoint: ["/sbin/init"]
   script:
-   - export CONTAINER_NAME="`hostname`-`echo ${CONTAINER_IMAGE_PATH}|sed -e 's/\//__/g'|sed -e 's/\:[1-9a-z]\+//g'`-0"
-   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory ./ketchup.yml --syntax-check"
-   - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${TARGET_APP} ./ketchup.yml"
-   - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${TARGET_APP}_test.yml --syntax-check"
-   - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${TARGET_APP}_test.yml -vv"
+    - export CONTAINER_NAME="`hostname`-`echo ${CONTAINER_IMAGE_PATH}|sed -e 's/\//__/g' -e 's/\:[1-9a-z]\+//g'`-0"
+    - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${TARGET_APP} ./ketchup.yml"
+    - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${TARGET_APP}_test.yml -vv"
   tags:
-   - docker
+    - docker
 
-ketchup_deploy:
+Ketchup_Deploy:
   stage: deploy
   image:
     name: ${CONTAINER_IMAGE_PATH}
   variables:
-    RUNNER_HOST_IP: "192.168.33.12"
+    RUNNER_HOST_IP: "192.168.33.15"
     CONTAINER_PORT: 80
+    KETCHUP_APP: ketchup
+    KETCHUP_NGINX_APP: ketchup-nginx
+    VAGRANT_KEY_PATH: /root/vagrant/infraci/.vagrant/machines
+  before_script:
+    - mkdir -pv ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox
+    - echo "${VAGRANT_PRIVATE_KEY[@]}" > ${VAGRANT_KEY_PATH}/$KETCHUP_APP/virtualbox/private_key
+    - echo "${VAGRANT_PRIVATE_KEY[@]}" > ${VAGRANT_KEY_PATH}/$KETCHUP_NGINX_APP/virtualbox/private_key
+    - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
   script:
-   - "ansible-playbook -i ./hosts/ketchup/inventory ./ketchup.yml -vv"
+    - "ansible-playbook -i ./hosts/ketchup/inventory ./ketchup.yml -vv"
   environment:
     name: review/${CI_COMMIT_REF_NAME}
     url: http://${RUNNER_HOST_IP}:${CONTAINER_PORT}/admin
   tags:
-   - docker
+    - docker

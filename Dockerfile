@@ -1,7 +1,6 @@
 FROM centos:centos7
 ENV container docker
 COPY ./ ./
-COPY ./private_key /root/vagrant/infraci/.vagrant/machines/ketchup/virtualbox/private_key
 RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \
 systemd-tmpfiles-setup.service ] || rm -f $i; done); \
 rm -f /lib/systemd/system/multi-user.target.wants/*;\
@@ -13,7 +12,6 @@ rm -f /lib/systemd/system/basic.target.wants/*;\
 rm -f /lib/systemd/system/anaconda.target.wants/*;\
 export LANG=C;\
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7;\
-chmod 400 /root/vagrant/infraci/.vagrant/machines/ketchup/virtualbox/private_key;\
 yum clean all;\
 yum update -y;\
 yum install -y "http://mirror.centos.org/centos/7/updates/x86_64/Packages/git-1.8.3.1-12.el7_4.x86_64.rpm";\
