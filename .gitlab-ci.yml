@@ -1,9 +1,10 @@
 ---
 stages:
   - lint
-  - build
-  - test
-  - deploy 
+  - unit_prepare
+  - unit_test
+  - int_deploy 
+  - int_test
 
 variables:
   CONTAINER_IMAGE: c7-systemd
@@ -20,8 +21,8 @@ Lint_Check:
   tags:
     - docker
 
-Pkg_Build:
-  stage: build
+Unit_Package:
+  stage: unit_prepare
   script:
     - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
     - docker build . -t ${CONTAINER_IMAGE_PATH}
@@ -29,8 +30,8 @@ Pkg_Build:
   tags:
     - docker
 
-Ketchup_Test:
-  stage: test
+Ketchup_Unit_Test:
+  stage: unit_test
   variables:
     TARGET_APP: ketchup
   services:
@@ -44,8 +45,8 @@ Ketchup_Test:
   tags:
     - docker
 
-Ketchup_Nginx_Test:
-  stage: test
+Ketchup_Nginx_Unit_Test:
+  stage: unit_test
   variables:
     TARGET_APP: ketchup_nginx
   services:
@@ -59,13 +60,11 @@ Ketchup_Nginx_Test:
   tags:
     - docker
 
-Ketchup_Deploy:
-  stage: deploy
+Ketchup_Int_Deploy:
+  stage: int_deploy
   image:
     name: ${CONTAINER_IMAGE_PATH}
   variables:
-    RUNNER_HOST_IP: "192.168.33.15"
-    CONTAINER_PORT: 80
     KETCHUP_APP: ketchup
     KETCHUP_NGINX_APP: ketchup-nginx
     VAGRANT_KEY_PATH: /root/vagrant/infraci/.vagrant/machines
@@ -76,6 +75,23 @@ Ketchup_Deploy:
     - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
   script:
     - "ansible-playbook -i ./hosts/ketchup/inventory ./ketchup.yml -vv"
+  tags:
+    - docker
+
+Ketchup_Nginx_Int_Test:
+  stage: int_test
+  image:
+    name: ${CONTAINER_IMAGE_PATH}
+  variables:
+    RUNNER_HOST_IP: "10.0.50.34"
+    CONTAINER_PORT: 80
+  before_script:
+    - mkdir -pv ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox
+    - echo "${VAGRANT_PRIVATE_KEY[@]}" > ${VAGRANT_KEY_PATH}/$KETCHUP_APP/virtualbox/private_key
+    - echo "${VAGRANT_PRIVATE_KEY[@]}" > ${VAGRANT_KEY_PATH}/$KETCHUP_NGINX_APP/virtualbox/private_key
+    - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
+  script:
+    - "cd ./tests; ansible-playbook -i ./inventory ./ketchup_int_test.yml -vv"
   environment:
     name: review/${CI_COMMIT_REF_NAME}
     url: http://${RUNNER_HOST_IP}:${CONTAINER_PORT}/admin
