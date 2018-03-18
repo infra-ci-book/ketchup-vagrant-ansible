@@ -7,7 +7,6 @@
 [ketchup_nginx]
 192.168.33.13
 
-
 [all:vars]
 ketchup_host=192.168.33.12
 ketchup_port=80
@@ -24,7 +23,6 @@ vagrant_basedir=~/vagrant/infraci
 ansible_ssh_user=vagrant
 ansible_ssh_private_key_file="~/vagrant/infraci/.vagrant/machines/ketchup/virtualbox/private_key"
 
-use_epel_repo=True
 use_nginx_proxy=False
 
 ketchup_repos="https://github.com/infra-ci-book/app-contents.git"
@@ -35,7 +33,6 @@ ketchup_data_dir="app-contents/contents/data"
 ansible_ssh_user=vagrant
 ansible_ssh_private_key_file="~/vagrant/infraci/.vagrant/machines/ketchup-nginx/virtualbox/private_key"
 
-use_epel_repo=True
 use_nginx_proxy=True
 
 nginx_http_port=80

@@ -1,4 +1,3 @@
 ---
 yum_online_repo_files:
-  - nginx-centos-7.repo
   - epel-7.repo

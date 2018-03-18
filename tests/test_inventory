@@ -22,7 +22,6 @@ vagrant_basedir=~/vagrant/infraci
 [ketchup:vars]
 ansible_connection=local
 
-use_epel_repo=True
 use_nginx_proxy=False
 
 ketchup_repos="https://github.com/infra-ci-book/app-contents.git"
@@ -32,7 +31,6 @@ ketchup_data_dir="app-contents/contents/data"
 [ketchup_nginx:vars]
 ansible_connection=local
 
-use_epel_repo=True
 use_nginx_proxy=True
 
 nginx_http_port=80
