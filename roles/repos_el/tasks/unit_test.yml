@@ -23,21 +23,4 @@
       warn: no
     changed_when: false
     register: test_registered_repos
-
-  - name: Check registration for epel repo
-    assert:
-      that:
-        - "'epel' in test_registered_repos.stdout"
-        - "'nginx' not in test_registered_repos.stdout"
-      msg: "epel repo is not enabled"
-    when: 'use_epel_repo|bool'
-
-  - name: Check registration for nginx repo
-    assert:
-      that:
-        - "'epel' not in test_registered_repos.stdout"
-        - "'nginx' in test_registered_repos.stdout"
-      msg: "nginx repo is not enabled"
-    when: 'use_epel_repo|bool == 0'
-
   become: True
