@@ -111,7 +111,7 @@ Ketchup_Nginx_Int_Test:
     - echo "${VAGRANT_PRIVATE_KEY[@]}" > ${VAGRANT_KEY_PATH}/$KETCHUP_NGINX_APP/virtualbox/private_key
     - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
   script:
-    - "cd ./tests; ansible-playbook -i ./test_inventory ./ketchup_int_test.yml -vv"
+    - "cd ./tests; ansible-playbook -i ../hosts/ketchup/test_inventory ./ketchup_int_test.yml -vv"
   environment:
     name: review/${CI_COMMIT_REF_NAME}
     url: http://${RUNNER_HOST_IP}:${CONTAINER_PORT}/admin
