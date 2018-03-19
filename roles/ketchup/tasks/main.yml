@@ -16,11 +16,12 @@
       path: '{{ ketchup_home }}'
       state: directory
       mode: 0755
-      
+
   - name: Download ketchup app and contents from github
     git:
       repo: '{{ ketchup_repos }}'
       dest: '{{ ketchup_home }}/app-contents'
+      version: master
     ignore_errors: True
 
   - name: Extract ketchup app

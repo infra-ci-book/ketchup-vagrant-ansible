@@ -31,7 +31,7 @@
       src: nginx.conf
       dest: /etc/nginx/nginx.conf
       backup: yes
-      
+
   - name: Install ketchup.conf for Ngnix
     template:
       src: 'ketchup.conf.j2'

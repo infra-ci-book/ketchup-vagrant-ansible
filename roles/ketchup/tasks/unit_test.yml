@@ -16,7 +16,7 @@
       path: "{{ ketchup_home }}/app-contents/README.md"
       timeout: 5
       msg: "Check ketchup home and git clone"
-  
+
   - name: Gathering status for git
     command: git diff origin/master
     args:
@@ -28,7 +28,7 @@
     assert:
       that:
         - '"---" not in test_ketchup_git.stdout'
-      msg: "Ketchup Application is differ from repo {{ test_ketchup_git.stdout }}" 
+      msg: "Ketchup Application is differ from repo {{ test_ketchup_git.stdout }}"
 
   - name: Check differences from archive
     command: tar dfz '{{ ketchup_app_path }}'
