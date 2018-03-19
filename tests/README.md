@@ -61,7 +61,16 @@ $ vi /etc/hosts (add the line)
 192.168.33.10  registry.gitlab.example.com
 ```
 
-### 4. CI/CD Pipeline
+### 4. Add SSH Private Key
+1. Login to GitLab as your account again and go to "ketchup-vagrant-ansible" project
+2. Select [Secret Values] from [Settings]>[CI/CD]
+3. Set your private key(.ssh/infraci) named as "VAGRANT_PRIVATE_KEY"
+
+    ![](https://github.com/infra-ci-book/ketchup-vagrant-ansible/raw/master/tests/images/03.JPG)
+
+4. Register variables from [Add new variable]
+
+### 5. CI/CD Pipeline
 1. Login to GitLab as your account again.   
 2. Select "ketchup-vagrant-ansible" project and [CI/CD]>[Pipelines]  
 3. Push [Run pipeline] to run jobs
