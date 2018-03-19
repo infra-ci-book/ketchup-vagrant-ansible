@@ -10,10 +10,27 @@ variables:
   CONTAINER_IMAGE: c7-systemd
   CONTAINER_IMAGE_PATH: ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CONTAINER_IMAGE}
 
-Lint_Check:
+Lint_Check_Master:
   stage: lint
+  image:
+    name: irixjp/lint-rules:latest
+    entrypoint: [""]
   script:
-    - echo "Lint Check will be executed in this stage"
+    - git clone https://github.com/infra-ci-book/lint-rules.git
+    - lint-rules/lint_master.sh
+  only:
+    - master
+  tags:
+    - docker
+
+Lint_Check_Branches:
+  stage: lint
+  image:
+    name: irixjp/lint-rules:latest
+    entrypoint: [""]
+  script:
+    - git clone https://github.com/infra-ci-book/lint-rules.git
+    - lint-rules/lint_branches.sh
   only:
     - branches
   except:
