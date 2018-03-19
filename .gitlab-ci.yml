@@ -16,6 +16,7 @@ Lint_Check_Master:
     name: irixjp/lint-rules:latest
     entrypoint: [""]
   script:
+    - ansible-playbook --syntax-check site.yml
     - git clone https://github.com/infra-ci-book/lint-rules.git
     - lint-rules/lint_master.sh
   only:
@@ -29,6 +30,7 @@ Lint_Check_Branches:
     name: irixjp/lint-rules:latest
     entrypoint: [""]
   script:
+    - ansible-playbook --syntax-check site.yml
     - git clone https://github.com/infra-ci-book/lint-rules.git
     - lint-rules/lint_branches.sh
   only:
@@ -80,7 +82,8 @@ Ketchup_Nginx_Unit_Test:
 Ketchup_Int_Deploy:
   stage: int_deploy
   image:
-    name: ${CONTAINER_IMAGE_PATH}
+    name: irixjp/lint-rules:latest
+    entrypoint: [""]
   variables:
     KETCHUP_APP: ketchup
     KETCHUP_NGINX_APP: ketchup-nginx
@@ -91,7 +94,7 @@ Ketchup_Int_Deploy:
     - echo "${VAGRANT_PRIVATE_KEY[@]}" > ${VAGRANT_KEY_PATH}/$KETCHUP_NGINX_APP/virtualbox/private_key
     - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
   script:
-    - "ansible-playbook -i ./hosts/ketchup/inventory ./ketchup.yml -vv"
+    - "ansible-playbook -i ./hosts/ketchup/test_inventory ./ketchup.yml -vv"
   tags:
     - docker
 
@@ -108,7 +111,7 @@ Ketchup_Nginx_Int_Test:
     - echo "${VAGRANT_PRIVATE_KEY[@]}" > ${VAGRANT_KEY_PATH}/$KETCHUP_NGINX_APP/virtualbox/private_key
     - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
   script:
-    - "cd ./tests; ansible-playbook -i ./inventory ./ketchup_int_test.yml -vv"
+    - "cd ./tests; ansible-playbook -i ./test_inventory ./ketchup_int_test.yml -vv"
   environment:
     name: review/${CI_COMMIT_REF_NAME}
     url: http://${RUNNER_HOST_IP}:${CONTAINER_PORT}/admin
