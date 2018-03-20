@@ -11,11 +11,18 @@
       paths: '../vars'
 
 - block:
+  - name: exist ketchup service?
+    shell: systemd -a | grep "{{ ketchup_init_name }}"
+    register: systemd_result
+    changed_when: false
+    ignore_errors: true
+
   - name: stop and disable ketchup
     systemd:
       name: "{{ ketchup_init_name }}"
       enabled: no
       state: stopped
+    when: systemd_result | succeeded
 
   - name: Delete ketchup service file
     file:
