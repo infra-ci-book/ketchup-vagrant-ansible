@@ -14,6 +14,7 @@
   - name: exist nginx service?
     shell: systemctl -a | grep {{ nginx_init_name }}
     register: systemd_result
+    changed_when: false
     ignore_errors: true
 
   - name: stop and disable nginx
