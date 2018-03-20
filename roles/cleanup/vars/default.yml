@@ -1,0 +1,7 @@
+---
+ketchup_bootstrap_path: /etc/systemd/system/ketchup.service
+ketchup_init_name: ketchup.service
+nginx_conf_dir: /etc/nginx/conf.d
+nginx_init_name: nginx
+yum_nginx_packages:
+  - nginx
