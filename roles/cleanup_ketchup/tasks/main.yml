@@ -1,0 +1,35 @@
+---
+- name: include task specific variables
+  include_vars: '{{ item }}'
+  with_first_found:
+    - files:
+        - '{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml'
+        - '{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml'
+        - '{{ ansible_distribution }}.yml'
+        - '{{ ansible_os_family }}.yml'
+        - 'default.yml'
+      paths: '../vars'
+
+- block:
+  - name: stop and disable ketchup
+    systemd:
+      name: "{{ ketchup_init_name }}"
+      enabled: no
+      state: stopped
+
+  - name: Delete ketchup service file
+    file:
+      path: '{{ ketchup_bootstrap_path }}'
+      state: absent
+
+  - name: systemd reload
+    systemd: daemon_reload=yes
+
+  - name: Delete ketchup dir
+    file:
+      path: '{{ ketchup_home }}'
+      state: absent
+
+  become: True
+
+

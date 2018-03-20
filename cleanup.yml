@@ -4,10 +4,10 @@
   gather_facts: True
 
   roles:
-    - role: cleanup
+    - role: cleanup_ketchup
 
 
 - name: Cleanup Ngnix frontend for Ketchup
   hosts: "ketchup_nginx"
   roles:
-    - role: cleanup
+    - role: cleanup_nginx

@@ -1,0 +1,5 @@
+---
+nginx_conf_dir: /etc/nginx/conf.d
+nginx_init_name: nginx
+yum_nginx_packages:
+  - nginx
