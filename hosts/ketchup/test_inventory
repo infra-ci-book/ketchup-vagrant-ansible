@@ -21,7 +21,7 @@ vagrant_basedir=~/vagrant/infraci
 
 [ketchup:vars]
 ansible_ssh_user=vagrant
-ansible_ssh_private_key_file="~/vagrant/infraci/.vagrant/machines/ketchup/virtualbox/private_key"
+ansible_ssh_private_key_file="~/vagrant/infraci/.vagrant/machines/test-ketchup/virtualbox/private_key"
 
 use_nginx_proxy=False
 
@@ -31,7 +31,7 @@ ketchup_data_dir="app-contents/contents/data"
 
 [ketchup_nginx:vars]
 ansible_ssh_user=vagrant
-ansible_ssh_private_key_file="~/vagrant/infraci/.vagrant/machines/ketchup-nginx/virtualbox/private_key"
+ansible_ssh_private_key_file="~/vagrant/infraci/.vagrant/machines/test-nginx/virtualbox/private_key"
 
 use_nginx_proxy=True
 
