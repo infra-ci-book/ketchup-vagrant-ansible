@@ -1,0 +1,13 @@
+---
+- name: Cleanup Ketchup host
+  hosts: "ketchup"
+  gather_facts: True
+
+  roles:
+    - role: cleanup
+
+
+- name: Cleanup Ngnix frontend for Ketchup
+  hosts: "ketchup_nginx"
+  roles:
+    - role: cleanup
