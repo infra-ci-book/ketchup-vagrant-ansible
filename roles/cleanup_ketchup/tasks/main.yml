@@ -12,7 +12,7 @@
 
 - block:
   - name: exist ketchup service?
-    shell: systemd -a | grep "{{ ketchup_init_name }}"
+    shell: systemd -a | grep {{ ketchup_init_name }}
     register: systemd_result
     ignore_errors: true
 
