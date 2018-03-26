@@ -1,0 +1,7 @@
+---
+- name: Integration test for ketchup app system
+  hosts: localhost
+  gather_facts: False
+  connestion: local
+  tasks:
+  - debug: msg="Not implementation"

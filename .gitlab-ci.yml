@@ -3,7 +3,7 @@ stages:
   - lint
   - unit_prepare
   - unit_test
-  - int_deploy 
+  - int_deploy
   - int_test
 
 variables:
@@ -85,14 +85,15 @@ Ketchup_Int_Deploy:
     name: irixjp/lint-rules:latest
     entrypoint: [""]
   variables:
-    KETCHUP_APP: ketchup
-    KETCHUP_NGINX_APP: ketchup-nginx
     VAGRANT_KEY_PATH: /root/vagrant/infraci/.vagrant/machines
+    KETCHUP_APP: test-ketchup
+    KETCHUP_NGINX_APP: test-ketchup-nginx
   before_script:
     - mkdir -pv ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox
     - echo "${VAGRANT_PRIVATE_KEY[@]}" > ${VAGRANT_KEY_PATH}/$KETCHUP_APP/virtualbox/private_key
     - echo "${VAGRANT_PRIVATE_KEY[@]}" > ${VAGRANT_KEY_PATH}/$KETCHUP_NGINX_APP/virtualbox/private_key
     - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
+    - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
   script:
     - "ansible-playbook -i ./hosts/ketchup/test_inventory ./ketchup.yml -vv"
   tags:
@@ -101,8 +102,12 @@ Ketchup_Int_Deploy:
 Ketchup_Nginx_Int_Test:
   stage: int_test
   image:
-    name: ${CONTAINER_IMAGE_PATH}
+    name: irixjp/lint-rules:latest
+    entrypoint: [""]
   variables:
+    VAGRANT_KEY_PATH: /root/vagrant/infraci/.vagrant/machines
+    KETCHUP_APP: test-ketchup
+    KETCHUP_NGINX_APP: test-ketchup-nginx
     RUNNER_HOST_IP: "10.0.50.34"
     CONTAINER_PORT: 80
   before_script:
@@ -112,6 +117,8 @@ Ketchup_Nginx_Int_Test:
     - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
   script:
     - "cd ./tests; ansible-playbook -i ../hosts/ketchup/test_inventory ./ketchup_int_test.yml -vv"
+  after_script:
+    - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
   environment:
     name: review/${CI_COMMIT_REF_NAME}
     url: http://${RUNNER_HOST_IP}:${CONTAINER_PORT}/admin

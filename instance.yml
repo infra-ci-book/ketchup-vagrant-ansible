@@ -1,8 +1,0 @@
----
-- name: Manage server instance
-  hosts: "vagrant"
-  gather_facts: False
-
-  roles:
-    - role: vagrant
-      when: 'instance_provider == "vagrant"'
