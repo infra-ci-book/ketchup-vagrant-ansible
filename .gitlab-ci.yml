@@ -95,7 +95,7 @@ Ketchup_Int_Deploy:
     - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
     - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
   script:
-    - "ansible-playbook -i ./hosts/ketchup/test_inventory ./ketchup.yml -vv"
+    - ansible-playbook -i ./hosts/ketchup/test_inventory ./ketchup.yml -vv
   tags:
     - docker
 
@@ -116,7 +116,7 @@ Ketchup_Nginx_Int_Test:
     - echo "${VAGRANT_PRIVATE_KEY[@]}" > ${VAGRANT_KEY_PATH}/$KETCHUP_NGINX_APP/virtualbox/private_key
     - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
   script:
-    - "cd ./tests; ansible-playbook -i ../hosts/ketchup/test_inventory ./ketchup_int_test.yml -vv"
+    - "cd ./tests; ansible-playbook -i ../hosts/ketchup/test_inventory ./int_test_ketchup_nginx.yml -vv"
   after_script:
     - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
   environment:
