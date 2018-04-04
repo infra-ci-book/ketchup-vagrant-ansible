@@ -4,16 +4,13 @@
   gather_facts: False
   connection: local
 
-  environment:
-    no_proxy: 10.0.50.32,localhost
-
   vars:
-    ketchup_host: '10.0.50.32'
+    ketchup_host: '192.168.33.14'
 
   tasks:
     - name: Check Redirect for URL end slash
       uri:
-        url: http://10.0.50.32/admin
+        url: "http://{{ ketchup_host }}/admin"
         follow_redirects: none
         status_code: 301
 
