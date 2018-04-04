@@ -25,9 +25,9 @@
         url: "http://{{ ketchup_host }}/ping"
         return_content: yes
       register: ketchup_connection_result
-  
+
     - name: Check service activation
-      fail: 
+      fail:
         msg: "application is not setup"
       when: "'pong' not in ketchup_connection_result.content"
 
