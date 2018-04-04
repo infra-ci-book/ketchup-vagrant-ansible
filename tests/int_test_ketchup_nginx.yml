@@ -3,5 +3,60 @@
   hosts: localhost
   gather_facts: False
   connection: local
+
+  environment:
+    no_proxy: 10.0.50.32,localhost
+
+  vars:
+    ketchup_host: '10.0.50.32'
+
   tasks:
-  - debug: msg="Not implementation"
+    - name: Check Redirect for URL end slash
+      uri:
+        url: http://10.0.50.32/admin
+        follow_redirects: none
+        status_code: 301
+
+    - name: Check Error Status
+      uri:
+        url: "http://{{ ketchup_host }}/error"
+        return_content: yes
+        status_code: 404
+
+    - name: Getting service readiness
+      uri:
+        url: "http://{{ ketchup_host }}/ping"
+        return_content: yes
+      register: ketchup_connection_result
+  
+    - name: Check service activation
+      fail: 
+        msg: "application is not setup"
+      when: "'pong' not in ketchup_connection_result.content"
+
+    - name: Login to kechup service
+      uri:
+        url: "http://{{ ketchup_host }}/api/v1/login"
+        method: POST
+        body: "email=admin&password=password"
+        headers:
+          Content-Type: "application/x-www-form-urlencoded"
+      register: ketchup_login_result
+
+    - name: Debug login sessions
+      debug:
+        var: ketchup_login_result.set_cookie
+        verbosity: 2
+
+    - name: Check login Administration
+      uri:
+        url: "http://{{ ketchup_host }}/admin/"
+        method: GET
+        return_content: yes
+        headers:
+          Cookie: "{{ ketchup_login_result.set_cookie }}"
+      register: ketchup_admin_result
+
+    - name: Check Keyword
+      debug:
+        var: ketchup_login_result
