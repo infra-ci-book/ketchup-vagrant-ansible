@@ -82,7 +82,6 @@ instance_action=''                # Choose an action from start, stop, and termi
 ansible_ssh_user=vagrant
 ansible_ssh_private_key_file="~/vagrant/infraci/.vagrant/machines/ketchup/virtualbox/private_key"
 
-use_nginx_proxy=False             # If you want to use Nginx proxy with ketchup CMS in the same host, set it to True
 #ketchup_host=192.168.33.12       # IPAddress or hostname of your ketchup CMS
 #ketchup_port=8080                # Port number of your ketchup CMS
 #nginx_http_port=80               # Port number of your Ngninx proxy
@@ -94,8 +93,6 @@ ketchup_data_dir="app-contents/contents/data"
 [ketchup_nginx:vars]
 ansible_ssh_user=vagrant
 ansible_ssh_private_key_file="~/vagrant/infraci/.vagrant/machines/ketchup-nginx/virtualbox/private_key"
-
-use_nginx_proxy=True
 
 nginx_http_port=80
 ```
