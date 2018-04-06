@@ -21,9 +21,6 @@
 #      packages_el_nginx_packages: True
 #      when: 'ansible_os_family == "RedHat"'
 #
-#    - role: nginx
-#      when: 'use_nginx_proxy|bool'
-#
 #    - role: ketchup
 #
   tasks:
@@ -38,12 +35,6 @@
         name: packages_el
         tasks_from: unit_test
       when: 'ansible_os_family == "RedHat"'
-
-    - name: Unit Test for nginx role
-      include_role:
-        name: nginx
-        tasks_from: unit_test
-      when: 'use_nginx_proxy|bool'
 
     - name: Unit Test for ketchup role
       include_role:

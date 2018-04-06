@@ -1,5 +1,5 @@
 ---
-- name: Install Ketchup with Nginx
+- name: Install Ketchup
   hosts: "ketchup"
   gather_facts: True
 
@@ -11,22 +11,4 @@
       packages_el_nginx_packages: True
       when: 'ansible_os_family == "RedHat"'
 
-    - role: nginx
-      when: 'use_nginx_proxy|bool'
-
     - role: ketchup
-
-
-- name: Install Ngnix frontend for Ketchup
-  hosts: "ketchup_nginx"
-  roles:
-    - role: repos_el
-      when: 'ansible_os_family == "RedHat"'
-
-    - role: packages_el
-      packages_el_nginx_packages: True
-      when: 'ansible_os_family == "RedHat"'
-
-    - role: nginx
-      when: 'use_nginx_proxy|bool'
-

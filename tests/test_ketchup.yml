@@ -14,9 +14,6 @@
       packages_el_nginx_packages: True
       when: 'ansible_os_family == "RedHat"'
 
-    - role: nginx
-      when: 'use_nginx_proxy|bool'
-
     - role: ketchup
 
 
@@ -36,4 +33,3 @@
       when: 'ansible_os_family == "RedHat"'
 
     - role: nginx
-      when: 'use_nginx_proxy|bool'

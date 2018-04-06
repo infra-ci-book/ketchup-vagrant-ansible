@@ -22,7 +22,6 @@
 #      when: 'ansible_os_family == "RedHat"'
 #
 #    - role: nginx
-#      when: 'use_nginx_proxy|bool'
 
   tasks:
     - name: Unit Test for repos_el role
@@ -41,4 +40,3 @@
       include_role:
         name: nginx
         tasks_from: unit_test
-      when: 'use_nginx_proxy|bool'

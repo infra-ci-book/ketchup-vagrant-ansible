@@ -1,2 +1,7 @@
 ---
 - import_playbook: ketchup.yml
+  tags:
+    - ketchup
+- import_playbook: ketchup_nginx.yml
+  tags:
+    - ketchup_nginx
