@@ -74,7 +74,7 @@ Ketchup_Nginx_Unit_Test:
       entrypoint: ["/sbin/init"]
   script:
     - export CONTAINER_NAME="`hostname`-`echo ${CONTAINER_IMAGE_PATH}|sed -e 's/\//__/g' -e 's/\:[1-9a-z]\+//g'`-0"
-    - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${TARGET_APP} ./ketchup.yml"
+    - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${TARGET_APP} ./${TARGET_APP}.yml"
     - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${TARGET_APP}_test.yml -vv"
   tags:
     - docker
