@@ -95,7 +95,7 @@ Ketchup_Int_Deploy:
     - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
     - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
   script:
-    - ansible-playbook -i ./hosts/ketchup/test_inventory ./ketchup.yml -vv
+    - ansible-playbook -i ./hosts/ketchup/test_inventory ./site.yml -vv
   tags:
     - docker
 
