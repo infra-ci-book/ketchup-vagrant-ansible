@@ -3,25 +3,11 @@
   hosts: ketchup_nginx
   become: True
 
-  environment:
-    http_proxy: "http://proxy.jpn.hp.com:8080"
-    https_proxy: "http://proxy.jpn.hp.com:8080"
-
   pre_tasks:
     - name: Remove the .dockerenv file so GitLab Omnibus doesn't get confused.
       file:
         path: /.dockerenv
         state: absent
-
-#  roles:
-#    - role: repos_el
-#      when: 'ansible_os_family == "RedHat"'
-#
-#    - role: packages_el
-#      packages_el_nginx_packages: True
-#      when: 'ansible_os_family == "RedHat"'
-#
-#    - role: nginx
 
   tasks:
     - name: Unit Test for repos_el role
