@@ -17,10 +17,10 @@ docker exec $KETCHUP_NAME yum install -y $ANSIBLE_PACKAGE_URL/$ANSIBLE_PACKAGE_N
 docker exec $KETCHUP_NGINX_NAME yum install -y $ANSIBLE_PACKAGE_URL/$ANSIBLE_PACKAGE_NAME
 
 # Launch test playbook for ketchup
-docker exec $KETCHUP_NAME /bin/bash -c "cd $TEST_DIR/tests && ansible-playbook -i test_inventory -t ketchup test_ketchup.yml"
+docker exec $KETCHUP_NAME       /bin/bash -c "cd $TEST_DIR/tests && ansible-playbook -i travis_test_inventory -t ketchup       travis_test_ketchup.yml"
 
 # Launch test playbook for ketchup_nginx
-docker exec $KETCHUP_NGINX_NAME /bin/bash -c "cd $TEST_DIR/tests && ansible-playbook -i test_inventory -t ketchup_nginx test_ketchup.yml"
+docker exec $KETCHUP_NGINX_NAME /bin/bash -c "cd $TEST_DIR/tests && ansible-playbook -i travis_test_inventory -t ketchup_nginx travis_test_ketchup.yml"
 
 #
 # [EOF]

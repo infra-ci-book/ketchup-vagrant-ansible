@@ -8,4 +8,4 @@ before_install:
   - sudo apt-get update -qq
 
 script:
-  - ./tests/test_ketchup.sh
+  - ./tests/travis_test_ketchup.sh
