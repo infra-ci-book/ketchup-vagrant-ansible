@@ -5,8 +5,10 @@
 
   roles:
     - role: repos_el
+      when: 'ansible_os_family == "RedHat"'
 
     - role: packages_el
       packages_el_nginx_packages: True
+      when: 'ansible_os_family == "RedHat"'
 
     - role: ketchup
