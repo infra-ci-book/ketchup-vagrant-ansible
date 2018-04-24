@@ -108,7 +108,7 @@ Ketchup_Nginx_Int_Test:
     VAGRANT_KEY_PATH: /root/vagrant/infraci/.vagrant/machines
     KETCHUP_APP: test-ketchup
     KETCHUP_NGINX_APP: test-ketchup-nginx
-    RUNNER_HOST_IP: "10.0.50.34"
+    TEST_HOST_IP: "192.168.33.15"
     CONTAINER_PORT: 80
   before_script:
     - mkdir -pv ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox
@@ -121,6 +121,6 @@ Ketchup_Nginx_Int_Test:
     - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
   environment:
     name: review/${CI_COMMIT_REF_NAME}
-    url: http://${RUNNER_HOST_IP}:${CONTAINER_PORT}/admin
+    url: http://${TEST_HOST_IP}:${CONTAINER_PORT}/admin
   tags:
     - docker
