@@ -37,6 +37,11 @@
       path: '{{ ketchup_home }}'
       state: absent
 
+  - name: Disable epel repository
+    ini_file:
+      dest: /etc/yum.repos.d/epel-7.repo
+      section: epel
+      option: enabled
+      value: 0
+
   become: True
-
-

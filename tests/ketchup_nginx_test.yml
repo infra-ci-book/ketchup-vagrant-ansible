@@ -14,13 +14,11 @@
       include_role:
         name: repos_el
         tasks_from: unit_test
-      when: 'ansible_os_family == "RedHat"'
 
     - name: Unit Test for packages_el role
       include_role:
         name: packages_el
         tasks_from: unit_test
-      when: 'ansible_os_family == "RedHat"'
 
     - name: Unit Test for nginx role
       include_role:

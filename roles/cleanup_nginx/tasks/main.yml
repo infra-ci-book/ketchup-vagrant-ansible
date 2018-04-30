@@ -40,4 +40,11 @@
       state: absent
     with_items: '{{ yum_nginx_packages }}'
 
+  - name: Disable epel repository
+    ini_file:
+      dest: /etc/yum.repos.d/epel-7.repo
+      section: epel
+      option: enabled
+      value: 0
+
   become: True
