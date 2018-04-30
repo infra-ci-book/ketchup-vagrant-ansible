@@ -19,6 +19,8 @@
       include_role:
         name: packages_el
         tasks_from: unit_test
+      vars:
+        packages_el_nginx_packages: False
 
     - name: Unit Test for ketchup role
       include_role:

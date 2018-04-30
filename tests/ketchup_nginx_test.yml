@@ -19,6 +19,8 @@
       include_role:
         name: packages_el
         tasks_from: unit_test
+      vars:
+        packages_el_nginx_packages: True
 
     - name: Unit Test for nginx role
       include_role:
