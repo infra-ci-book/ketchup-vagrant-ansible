@@ -1,0 +1,54 @@
+---
+stages:
+  - lint
+  - build
+  - unit_test
+#  - int_deploy
+#  - int_test
+
+variables:
+  KETCHUP_IMAGE: ketchup
+  KETCHUP_IMAGE_PATH: ${CI_REGISTRY}/${CI_PROJECT_PATH}/${KETCHUP_IMAGE}
+  KETCHUP_NGINX_IMAGE: ketchup_nginx
+  KETCHUP_NGINX_IMAGE_PATH: ${CI_REGISTRY}/${CI_PROJECT_PATH}/${KETCHUP_NGINX_IMAGE}
+  BUILD_TAG: "0.1"
+
+Lint_Check:
+  stage: lint
+  image:
+    name: hadolint/hadolint
+  script:
+    - hadolint --ignore="SC2086" - < ./flexible_artifacts/${KETCHUP_IMAGE}/Dockerfile
+    - hadolint --ignore="SC2086" - < ./flexible_artifacts/${KETCHUP_NGINX_IMAGE}/Dockerfile
+  tags:
+    - docker
+
+Build_Ketchup_Image:
+  stage: build
+  before_script:
+    - docker info
+  script:
+    - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
+    - docker build --force-rm=true -f ./flexible_artifacts/${KETCHUP_IMAGE}/Dockerfile -t ${KETCHUP_IMAGE_PATH}:${BUILD_TAG} .
+    - docker push ${KETCHUP_IMAGE_PATH}
+  tags:
+    - docker
+
+Build_Ketchup_Nginx_Image:
+  stage: build
+  before_script:
+    - docker info
+  script:
+    - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
+    - cd ./flexible_artifacts/${KETCHUP_NGINX_IMAGE} && docker build --force-rm=true . -t ${KETCHUP_NGINX_IMAGE_PATH}:${BUILD_TAG}
+    - docker push ${KETCHUP_NGINX_IMAGE_PATH}
+  tags:
+    - docker
+
+Ketchup_Unit_Test:
+  stage: unit_test
+  image: ${KETCHUP_IMAGE_PATH}:${BUILD_TAG}
+  script:
+    - cd ./tests; ansible-playbook -i ./inventory ./${TARGET_APP}_test.yml -vv
+  tags:
+    - docker
