@@ -3,4 +3,5 @@
   systemd:
     name: "{{ nginx_init_name }}"
     state: restarted
+  when: artifact|default("playbook") != "containered"
   become: True
