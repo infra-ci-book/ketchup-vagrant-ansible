@@ -1,14 +1,15 @@
 [vagrant]
-localhost
+127.0.0.1
 
 [ketchup]
-localhost
+127.0.0.1
 
 [ketchup_nginx]
-localhost
+127.0.0.1
 
 [all:vars]
 ketchup_host=127.0.0.1
+ketchup_nginx_host=127.0.0.1
 ketchup_port=8080
 
 [vagrant:vars]
@@ -22,11 +23,13 @@ vagrant_basedir=~/vagrant/infraci
 [ketchup:vars]
 ansible_connection=local
 
+
 ketchup_repos="https://github.com/infra-ci-book/app-contents.git"
 ketchup_app_path="app-contents/applications/ketchup_Linux_x86_64.tar.gz"
 ketchup_data_dir="app-contents/contents/data"
 
 [ketchup_nginx:vars]
 ansible_connection=local
+
 
 nginx_http_port=80
