@@ -9,6 +9,7 @@
 
 [all:vars]
 ketchup_host=192.168.33.14
+ketchup_nginx_host=192.168.33.15
 ketchup_port=80
 
 [vagrant:vars]

@@ -3,26 +3,22 @@
   hosts: localhost
   gather_facts: False
   connection: local
-
-  vars:
-    ketchup_host: '192.168.33.15'
-
   tasks:
     - name: Check Redirect for URL end slash
       uri:
-        url: "http://{{ ketchup_host }}/admin"
+        url: "http://{{ ketchup_nginx_host }}/admin"
         follow_redirects: none
         status_code: 301
 
     - name: Check Error Status
       uri:
-        url: "http://{{ ketchup_host }}/error"
+        url: "http://{{ ketchup_nginx_host }}/error"
         return_content: yes
         status_code: 404
 
     - name: Getting service readiness
       uri:
-        url: "http://{{ ketchup_host }}/ping"
+        url: "http://{{ ketchup_nginx_host }}/ping"
         return_content: yes
       register: ketchup_connection_result
 
@@ -33,7 +29,7 @@
 
     - name: Login to kechup service
       uri:
-        url: "http://{{ ketchup_host }}/api/v1/login"
+        url: "http://{{ ketchup_nginx_host }}/api/v1/login"
         method: POST
         body: "email=admin&password=password"
         headers:
@@ -47,7 +43,7 @@
 
     - name: Check login Administration
       uri:
-        url: "http://{{ ketchup_host }}/admin/"
+        url: "http://{{ ketchup_nginx_host }}/admin/"
         method: GET
         return_content: yes
         headers:
