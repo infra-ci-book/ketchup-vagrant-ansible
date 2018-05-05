@@ -2,7 +2,8 @@
 stages:
   - lint
   - build
-  - unit_test
+  - unit_deploy
+#  - unit_test
 #  - int_deploy
 #  - int_test
 
@@ -25,6 +26,7 @@ Lint_Check:
 
 Build_Ketchup_Image:
   stage: build
+  image: docker:stable
   before_script:
     - docker info
   script:
@@ -36,6 +38,7 @@ Build_Ketchup_Image:
 
 Build_Ketchup_Nginx_Image:
   stage: build
+  image: docker:stable
   before_script:
     - docker info
   script:
@@ -45,10 +48,17 @@ Build_Ketchup_Nginx_Image:
   tags:
     - docker
 
-Ketchup_Unit_Test:
-  stage: unit_test
-  image: ${KETCHUP_IMAGE_PATH}:${BUILD_TAG}
+Ketchup_Unit_Deploy:
+  stage: unit_deploy
+  image:
+    name: irixjp/lint-rules:latest
+    entrypoint: [""]
   script:
-    - cd ./tests; ansible-playbook -i ./inventory ./${TARGET_APP}_test.yml -vv
+    - yum install -y docker-python
+    - cd ./flexible_artifacts/
+    - ansible-playbook -i ./hosts/ketchup/inventory -e "IMAGE_PATH=${KETCHUP_IMAGE_PATH}" ./deploy_ketchup_container.yml -vv
+    - ansible-playbook -i ./hosts/ketchup/inventory -e "IMAGE_PATH=${KETCHUP_NGINX_IMAGE_PATH}" ./deploy_ketchup_nginx_container.yml -vv
   tags:
     - docker
+
+
