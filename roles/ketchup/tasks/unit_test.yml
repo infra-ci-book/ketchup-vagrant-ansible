@@ -72,6 +72,7 @@
       enabled: yes
       state: started
     check_mode: true
+    when: artifact|default("playbook") != "containered"
     register: test_ketchup_status
 
   - name: Check ketchup status
@@ -79,6 +80,7 @@
       that:
         - "test_ketchup_status.changed|bool == 0"
       msg: "ketchup is not active."
+    when: artifact|default("playbook") != "containered"
 
   - name: Check ketchup port
     wait_for:

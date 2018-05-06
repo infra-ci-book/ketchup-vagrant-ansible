@@ -1,0 +1,92 @@
+---
+stages:
+  - lint
+  - build
+  - unit_test
+  - int_deploy
+  - int_test
+
+variables:
+  KETCHUP_IMAGE: ketchup
+  KETCHUP_IMAGE_PATH: ${CI_REGISTRY}/${CI_PROJECT_PATH}/${KETCHUP_IMAGE}
+  KETCHUP_NGINX_IMAGE: ketchup_nginx
+  KETCHUP_NGINX_IMAGE_PATH: ${CI_REGISTRY}/${CI_PROJECT_PATH}/${KETCHUP_NGINX_IMAGE}
+  BUILD_TAG: "0.1"
+
+Lint_Check:
+  stage: lint
+  image:
+    name: hadolint/hadolint
+  script:
+    - hadolint --ignore="SC2086" - < ./flexible_artifacts/${KETCHUP_IMAGE}/Dockerfile
+    - hadolint --ignore="SC2086" - < ./flexible_artifacts/${KETCHUP_NGINX_IMAGE}/Dockerfile
+  tags:
+    - docker
+
+Build_Ketchup_Image:
+  stage: build
+  image: docker:stable
+  before_script:
+    - docker info
+  script:
+    - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
+    - docker build --force-rm=true -f ./flexible_artifacts/${KETCHUP_IMAGE}/Dockerfile -t ${KETCHUP_IMAGE_PATH}:${BUILD_TAG} .
+    - docker push ${KETCHUP_IMAGE_PATH}
+  tags:
+    - docker
+
+Build_Ketchup_Nginx_Image:
+  stage: build
+  image: docker:stable
+  before_script:
+    - docker info
+  script:
+    - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
+    - docker build --force-rm=true -f ./flexible_artifacts/${KETCHUP_NGINX_IMAGE}/Dockerfile -t ${KETCHUP_NGINX_IMAGE_PATH}:${BUILD_TAG} .
+    - docker push ${KETCHUP_NGINX_IMAGE_PATH}
+  tags:
+    - docker
+
+Unit_Test_Ketchup:
+  stage: unit_test
+  image:
+    name: irixjp/lint-rules:latest
+    entrypoint: [""]
+  script:
+    - yum install -y python-docker-py docker-client
+    - cd ./flexible_artifacts/
+    - ansible-playbook -i ./hosts/ketchup/inventory -e "IMAGE_PATH=${KETCHUP_IMAGE_PATH}" ./manage_ketchup_container.yml -vv
+    - ansible-playbook -i ./hosts/ketchup/inventory -e "IMAGE_PATH=${KETCHUP_NGINX_IMAGE_PATH}" ./manage_ketchup_nginx_container.yml -vv
+    - cd ../tests/
+    - ansible-playbook -e 'artifact=containered' -e "ansible_become=false" -e "ansible_connection=docker" -i ../flexible_artifacts/hosts/docker.py -i ../flexible_artifacts/hosts/ketchup/inventory ./ketchup_test.yml -vv
+    - ansible-playbook -e 'artifact=containered' -e "ansible_become=false" -e "ansible_connection=docker" -i ../flexible_artifacts/hosts/docker.py -i ../flexible_artifacts/hosts/ketchup/inventory ./ketchup_nginx_test.yml -vv
+  after_script:
+    - cd ./flexible_artifacts/
+    - ansible-playbook -i ./hosts/ketchup/inventory -t absent ./manage_ketchup_container.yml -vv
+    - ansible-playbook -i ./hosts/ketchup/inventory -t absent ./manage_ketchup_nginx_container.yml -vv
+  tags:
+    - docker
+
+Init_Deploy_Kethup:
+  stage: int_deploy
+  image:
+    name: irixjp/lint-rules:latest
+    entrypoint: [""]
+  script:
+    - yum install -y python-docker-py
+    - cd ./flexible_artifacts/
+    - ansible-playbook -i ./hosts/ketchup/inventory -e "IMAGE_PATH=${KETCHUP_IMAGE_PATH}" ./manage_ketchup_container.yml -vv
+    - ansible-playbook -i ./hosts/ketchup/inventory -e "IMAGE_PATH=${KETCHUP_NGINX_IMAGE_PATH}" ./manage_ketchup_nginx_container.yml -vv
+  tags:
+    - docker
+ 
+Init_Test_Kethup:
+  stage: int_test
+  image:
+    name: irixjp/lint-rules:latest
+    entrypoint: [""]
+  script:
+    - cd ./tests/
+    - ansible-playbook -i ../flexible_artifacts/hosts/ketchup/inventory -e "ketchup_nginx_host=192.168.33.11" ./int_test_ketchup_nginx.yml -vv
+  tags:
+    - docker

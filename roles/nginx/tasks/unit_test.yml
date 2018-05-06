@@ -17,7 +17,7 @@
     ignore_errors: true
     changed_when: false
 
-  - name: Getting SElinux permission for Ngnix
+  - name: Getting selinux permission for Ngnix
     command: getsebool httpd_can_network_connect
     register: test_getsebool
     ignore_errors: true
@@ -27,7 +27,7 @@
     assert:
       that:
         - "'on' in test_getsebool.stdout|default('on')"
-      msg: "SELinux permission is not set"
+      msg: "SElinux permission is not set"
 
   - name: Gathering nginx.conf status
     copy:
@@ -65,10 +65,9 @@
 
   - name: Check Nginx port
     wait_for:
-      port: "{{ nginx_http_port }}"
-      state: started
-      timeout: 120
       host: localhost
+      port: "{{ nginx_http_port }}"
+      timeout: 120
 
   become: true
 
