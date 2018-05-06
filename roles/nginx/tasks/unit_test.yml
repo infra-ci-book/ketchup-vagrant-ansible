@@ -17,7 +17,7 @@
     ignore_errors: true
     changed_when: false
 
-  - name: Getting selinux permission for Ngnix
+  - name: Getting SElinux permission for Ngnix
     command: getsebool httpd_can_network_connect
     register: test_getsebool
     ignore_errors: true
@@ -27,7 +27,7 @@
     assert:
       that:
         - "'on' in test_getsebool.stdout|default('on')"
-      msg: "SElinux permission is not set"
+      msg: "SELinux permission is not set"
 
   - name: Gathering nginx.conf status
     copy:
