@@ -7,6 +7,7 @@
         locust -f ./locust/locustfile.py -H http://{{ ketchup_nginx_host }} \
                --no-web --only-summary -c 1 -r 2 -t 4 | tee locust.txt
       register: locust_result
+      changed_when: false
 
     - name: Display results
       debug: var=locust_result
