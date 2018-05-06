@@ -14,7 +14,6 @@ Lint_Check_Master:
   stage: lint
   image:
     name: irixjp/lint-rules:latest
-    entrypoint: [""]
   script:
     - ansible-playbook --syntax-check site.yml
     - git clone https://github.com/infra-ci-book/lint-rules.git
@@ -28,7 +27,6 @@ Lint_Check_Branches:
   stage: lint
   image:
     name: irixjp/lint-rules:latest
-    entrypoint: [""]
   script:
     - ansible-playbook --syntax-check site.yml
     - git clone https://github.com/infra-ci-book/lint-rules.git
@@ -83,7 +81,6 @@ Ketchup_Int_Deploy:
   stage: int_deploy
   image:
     name: irixjp/lint-rules:latest
-    entrypoint: [""]
   variables:
     VAGRANT_KEY_PATH: /root/vagrant/infraci/.vagrant/machines
     KETCHUP_APP: test-ketchup
@@ -103,7 +100,6 @@ Ketchup_Nginx_Int_Test:
   stage: int_test
   image:
     name: irixjp/lint-rules:latest
-    entrypoint: [""]
   variables:
     VAGRANT_KEY_PATH: /root/vagrant/infraci/.vagrant/machines
     KETCHUP_APP: test-ketchup

@@ -1,0 +1,25 @@
+---
+stages:
+  - sys_test_locust
+
+Locust_test:
+  variables:
+    VAGRANT_KEY_PATH: /root/vagrant/infraci/.vagrant/machines
+    KETCHUP_APP: test-ketchup
+    KETCHUP_NGINX_APP: test-ketchup-nginx
+  stage: sys_test_locust
+  image:
+    name: irixjp/locust:latest
+  before_script:
+    - mkdir -pv ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox
+    - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_APP/virtualbox/private_key
+    - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_NGINX_APP/virtualbox/private_key
+    - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
+    - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
+    - ansible-playbook -i ./hosts/ketchup/test_inventory ./site.yml -vv
+  script:
+    - cd ./flexible_artifacts && ansible-playbook -i ../hosts/ketchup/test_inventory sys_test_locust.yml -vv
+  after_script:
+    - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
+  tags:
+    - docker

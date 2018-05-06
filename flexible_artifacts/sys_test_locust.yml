@@ -1,0 +1,12 @@
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Performance test to ketchup_nginx by Locust
+      shell: |
+        locust -f ./locust/locustfile.py -H http://{{ ketchup_nginx_host }} \
+               --no-web --only-summary -c 1 -r 2 -t 4
+      register: locust_result
+
+    - name: Display results
+      debug: var=locust_result
