@@ -65,9 +65,10 @@
 
   - name: Check Nginx port
     wait_for:
-      host: localhost
       port: "{{ nginx_http_port }}"
+      status: started
       timeout: 120
+      host: localhost
 
   become: true
 
