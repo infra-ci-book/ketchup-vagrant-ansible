@@ -5,7 +5,7 @@
     - name: Performance test to ketchup_nginx by Locust
       shell: |
         locust -f ./locust/locustfile.py -H http://{{ ketchup_nginx_host }} \
-               --no-web --only-summary -c 1 -r 2 -t 4
+               --no-web --only-summary -c 1 -r 2 -t 4 | tee locust.txt
       register: locust_result
 
     - name: Display results
