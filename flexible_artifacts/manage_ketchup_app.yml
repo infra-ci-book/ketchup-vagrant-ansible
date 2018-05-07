@@ -1,0 +1,41 @@
+---
+- name: Manage Ketchup Containers
+  hosts: "gitlab-runner"
+  gather_facts: false
+
+  vars:
+    KETCHUP_NAME: 'ketchup'
+    KETCHUP_NGINX_NAME: 'ketchup_nginx'
+    KETCHUP_IMAGE: 'test/{{ KETCHUP_NAME }}'
+    KETCHUP_NGINX_IMAGE: 'test/{{ KETCHUP_NGINX_NAME }}'
+    IMAGE_VER: devel
+
+  tasks:
+    - name: Cleanup running conatainer
+      docker_container:
+        name: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ KETCHUP_NAME }}"
+        - "{{ KETCHUP_NGINX_NAME }}"
+      tags: absent
+
+    - name: Run ketchup container
+      docker_container:
+        name: "{{ KETCHUP_NAME }}"
+        image: "{{ KETCHUP_IMAGE }}:{{ IMAGE_VER }}"
+        state: started
+        expose:
+          - 80
+      tags: started
+
+    - name: Run ketchup_nginx container
+      docker_container:
+        name: "{{ KETCHUP_NGINX_NAME }}"
+        image: "{{ KETCHUP_NGINX_IMAGE }}:{{ IMAGE_VER }}"
+        state: started
+        ports:
+          - "80:80"
+        links:
+          - "{{ KETCHUP_NAME }}:{{ KETCHUP_NAME }}"
+      tags: started
