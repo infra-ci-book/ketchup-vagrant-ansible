@@ -21,7 +21,7 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/*; \
     git clone http://${GITLAB_IP}/infra-ci/${GITLAB_REPO}.git;
 
 WORKDIR /${GITLAB_REPO}
-RUN ansible-playbook -e 'artifact=containered' -i ./tests/inventory -l ${TARGET_APP} ./${TARGET_APP}.yml
+RUN ansible-playbook -e 'artifact=containered' -i ./flexible_artifacts/hosts/ketchup/inventory -l ${TARGET_APP} ./${TARGET_APP}.yml
 
 VOLUME ["/sys/fs/cgroup","/bin"]
 WORKDIR /opt/ketchup
