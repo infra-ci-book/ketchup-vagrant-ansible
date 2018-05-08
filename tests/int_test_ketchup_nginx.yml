@@ -4,7 +4,7 @@
   gather_facts: False
   connection: local
   tasks:
-    - name: Check Redirect for URL end slash
+    - name: Confirm redirect without the last slash
       uri:
         url: "http://{{ ketchup_nginx_host }}/admin"
         follow_redirects: none
