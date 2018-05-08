@@ -11,7 +11,9 @@ variables:
   GL_KETCHUP_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}/${GL_KETCHUP_NAME}
   GL_KETCHUP_NGINX_NAME: ketchup_nginx
   GL_KETCHUP_NGINX_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}/${GL_KETCHUP_NGINX_NAME}
-  BUILD_TAG: "devel"
+
+before_script:
+  - export BUILD_TAG="devel-$(echo $CI_COMMIT_SHA | cut -c1-8)"
 
 Lint_Check:
   stage: lint
@@ -26,8 +28,6 @@ Lint_Check:
 Build_Ketchup_Image:
   stage: build
   image: docker:stable
-  before_script:
-    - docker info
   script:
     - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
     - docker build --force-rm=true -f ./flexible_artifacts/${GL_KETCHUP_NAME}/Dockerfile -t ${GL_KETCHUP_IMAGE}:${BUILD_TAG} .
@@ -38,8 +38,6 @@ Build_Ketchup_Image:
 Build_Ketchup_Nginx_Image:
   stage: build
   image: docker:stable
-  before_script:
-    - docker info
   script:
     - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
     - docker build --force-rm=true -f ./flexible_artifacts/${GL_KETCHUP_NGINX_NAME}/Dockerfile -t ${GL_KETCHUP_NGINX_IMAGE}:${BUILD_TAG} .
@@ -55,7 +53,7 @@ Unit_Test_Ketchup:
   script:
     - yum install -y python-docker-py docker-client
     - cd ./flexible_artifacts/
-    - ansible-playbook -i ./hosts/ketchup/inventory -e "KETCHUP_IMAGE=${GL_KETCHUP_IMAGE}" -e "KETCHUP_NGINX_IMAGE=${GL_KETCHUP_NGINX_IMAGE}" ./manage_ketchup_app.yml -vv
+    - ansible-playbook -i ./hosts/ketchup/inventory -t develop -e "KETCHUP_IMAGE=${GL_KETCHUP_IMAGE}" -e "KETCHUP_NGINX_IMAGE=${GL_KETCHUP_NGINX_IMAGE}" -e "IMAGE_VER=${BUILD_TAG}" ./manage_ketchup_app.yml -vv
     - cd ../tests/
     - ansible-playbook -e 'artifact=containered' -e "ansible_become=false" -e "ansible_connection=docker" -i ../flexible_artifacts/hosts/docker.py -i ../flexible_artifacts/hosts/ketchup/inventory ./ketchup_test.yml -vv
     - ansible-playbook -e 'artifact=containered' -e "ansible_become=false" -e "ansible_connection=docker" -i ../flexible_artifacts/hosts/docker.py -i ../flexible_artifacts/hosts/ketchup/inventory ./ketchup_nginx_test.yml -vv
@@ -73,7 +71,9 @@ Init_Deploy_Kethup:
   script:
     - yum install -y python-docker-py
     - cd ./flexible_artifacts/
-    - ansible-playbook -i ./hosts/ketchup/inventory -e "KETCHUP_IMAGE=${GL_KETCHUP_IMAGE}" -e "KETCHUP_NGINX_IMAGE=${GL_KETCHUP_NGINX_IMAGE}" ./manage_ketchup_app.yml -vv
+    - ansible-playbook -i ./hosts/ketchup/inventory -t develop -e "KETCHUP_IMAGE=${GL_KETCHUP_IMAGE}" -e "KETCHUP_NGINX_IMAGE=${GL_KETCHUP_NGINX_IMAGE}" -e "IMAGE_VER=${BUILD_TAG}" ./manage_ketchup_app.yml -vv
+  after_script:
+    - sleep 10
   tags:
     - docker
 

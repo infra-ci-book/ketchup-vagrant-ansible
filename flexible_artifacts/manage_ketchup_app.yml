@@ -18,7 +18,9 @@
       with_items:
         - "{{ KETCHUP_NAME }}"
         - "{{ KETCHUP_NGINX_NAME }}"
-      tags: absent
+      tags:
+        - develop
+        - absent
 
     - name: Run ketchup container
       docker_container:
@@ -27,7 +29,9 @@
         state: started
         expose:
           - 80
-      tags: started
+      tags:
+        - develop
+        - started
 
     - name: Run ketchup_nginx container
       docker_container:
@@ -38,4 +42,6 @@
           - "80:80"
         links:
           - "{{ KETCHUP_NAME }}:{{ KETCHUP_NAME }}"
-      tags: started
+      tags:
+        - develop
+        - started

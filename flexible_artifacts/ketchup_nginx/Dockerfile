@@ -21,6 +21,9 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/*; \
 WORKDIR /${GITLAB_REPO}
 RUN ansible-playbook -e 'artifact=containered' -e 'ketchup_host=ketchup' -i ./flexible_artifacts/hosts/ketchup/inventory -l ${TARGET_APP} ./${TARGET_APP}.yml
 
+WORKDIR /
+RUN rm -fr /"${GITLAB_REPO:?}"
+
 # forward request and error logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
 	&& ln -sf /dev/stderr /var/log/nginx/error.log
