@@ -76,7 +76,7 @@ Init_Deploy_Kethup:
     - ansible-playbook -i ./hosts/ketchup/inventory -e "KETCHUP_IMAGE=${GL_KETCHUP_IMAGE}" -e "KETCHUP_NGINX_IMAGE=${GL_KETCHUP_NGINX_IMAGE}" ./manage_ketchup_app.yml -vv
   tags:
     - docker
- 
+
 Init_Test_Kethup:
   stage: int_test
   image:
