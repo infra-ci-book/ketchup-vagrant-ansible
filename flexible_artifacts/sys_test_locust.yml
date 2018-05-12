@@ -1,13 +1,32 @@
 - hosts: localhost
   connection: local
   gather_facts: false
+
+  vars:
+    LC_NUM_CLIENTS: 200
+    LC_HATCH_RATE: 50
+    LC_RUN_TIME: 30
+
   tasks:
-    - name: Performance test to ketchup_nginx by Locust
-      shell: |
+    - name: Performance test to ketchup_nginx
+      command: |-
         locust -f ./locust/locustfile.py -H http://{{ ketchup_nginx_host }} \
-               --no-web --only-summary -c 1 -r 2 -t 4 | tee locust.txt
+               --no-web --only-summary --logfile=/var/log/locust.log --csv=sys_test \
+               -c "{{ LC_NUM_CLIENTS }}" -r "{{ LC_HATCH_RATE }}" -t "{{ LC_RUN_TIME }}"
       register: locust_result
       changed_when: false
 
-    - name: Display results
-      debug: var=locust_result
+    - name: Output performance result
+      copy:
+        content: "{{ locust_result.stderr_lines }}"
+        dest: ./sys_test_locust_result.log
+
+    - name: Read result CSV file
+      debug:
+        msg: "NUM_CLIENTS: {{ LC_NUM_CLIENTS }} ,Req/s: {{ lookup('csvfile', 'GET file=sys_test_requests.csv delimiter=, col=9') }}"
+
+    - name: Judge performance request
+      assert:
+        that:
+          - LC_NUM_CLIENTS <= lookup('csvfile', 'GET file=sys_test_requests.csv delimiter=, col=9')
+        msg: "Performance is degraded"
