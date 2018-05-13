@@ -1,25 +1,55 @@
 ---
 stages:
-  - sys_test_locust
+  - sys_deploy
+  - sys_test
 
-Locust_test:
+variables:
+  GL_LOCUST_NAME: locust
+  GL_LOCUST_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}/${GL_LOCUST_NAME}
+
+Ketchup_Sys_Deploy:
+  stage: sys_deploy
+  image:
+    name: irixjp/lint-rules:latest
+    entrypoint: [""]
   variables:
     VAGRANT_KEY_PATH: /root/vagrant/infraci/.vagrant/machines
     KETCHUP_APP: test-ketchup
     KETCHUP_NGINX_APP: test-ketchup-nginx
-  stage: sys_test_locust
-  image:
-    name: irixjp/locust:latest
   before_script:
     - mkdir -pv ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox
     - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_APP/virtualbox/private_key
     - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_NGINX_APP/virtualbox/private_key
     - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
-    - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
-    - ansible-playbook -i ./hosts/ketchup/test_inventory ./site.yml -vv
+#    - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
   script:
-    - cd ./flexible_artifacts && ansible-playbook -i ../hosts/ketchup/test_inventory sys_test_locust.yml -vv
+    - ansible-playbook -i ./hosts/ketchup/test_inventory ./site.yml -vv
+  tags:
+    - docker
+
+Ketchup_Performance_Test:
+  stage: sys_test
+  image:
+    name: ${GL_LOCUST_IMAGE}:devel
+  variables:
+    VAGRANT_KEY_PATH: /root/vagrant/infraci/.vagrant/machines
+    KETCHUP_APP: test-ketchup
+    KETCHUP_NGINX_APP: test-ketchup-nginx
+  script:
+    - cd ./flexible_artifacts
+    - ansible-playbook -i ../hosts/ketchup/test_inventory sys_test_locust.yml -vv
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
+    paths:
+      - ./flexible_artifacts/sys_test*.log 
+      - ./flexible_artifacts/sys_test*.csv
+    expire_in: 1 day
+    when: on_success
   after_script:
-    - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
+    - mkdir -pv ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox
+    - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_APP/virtualbox/private_key
+    - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_NGINX_APP/virtualbox/private_key
+    - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
+#    - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
   tags:
     - docker
