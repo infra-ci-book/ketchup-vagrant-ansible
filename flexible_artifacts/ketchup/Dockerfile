@@ -6,19 +6,19 @@ ENV TARGET_APP ketchup
 ENV GITLAB_IP 192.168.33.10
 ENV GITLAB_REPO ketchup-vagrant-ansible
 
-RUN rm -f /lib/systemd/system/multi-user.target.wants/*; \
-    rm -f /etc/systemd/system/*.wants/*; \
-    rm -f /lib/systemd/system/local-fs.target.wants/*; \
-    rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
-    rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
-    rm -f /lib/systemd/system/basic.target.wants/*; \
-    rm -f /lib/systemd/system/anaconda.target.wants/*; \
+RUN rm -f "/lib/systemd/system/multi-user.target.wants/*"; \
+    rm -f "/etc/systemd/system/*.wants/*"; \
+    rm -f "/lib/systemd/system/local-fs.target.wants/*"; \
+    rm -f "/lib/systemd/system/sockets.target.wants/*udev*"; \
+    rm -f "/lib/systemd/system/sockets.target.wants/*initctl*"; \
+    rm -f "/lib/systemd/system/basic.target.wants/*"; \
+    rm -f "/lib/systemd/system/anaconda.target.wants/*"; \
     export LANG=C; \
     rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7; \
     yum install -y epel-release; \
     yum install -y git; \
-    yum install -y ansible-${ANSIBLE_VERSION:?}; \
-    git clone http://${GITLAB_IP}/root/${GITLAB_REPO}.git;
+    yum install -y "ansible-${ANSIBLE_VERSION:?}"; \
+    git clone "http://${GITLAB_IP}/root/${GITLAB_REPO}".git;
 
 WORKDIR /${GITLAB_REPO}
 RUN ansible-playbook -e 'artifact=containered' -i ./flexible_artifacts/hosts/ketchup/inventory -l ${TARGET_APP} ./${TARGET_APP}.yml
