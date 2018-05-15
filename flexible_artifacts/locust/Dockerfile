@@ -1,7 +1,6 @@
 FROM centos:7
 ENV container docker
 
-ENV PIP_VERSION 10.0.1
 ENV ANSIBLE_VERSION 2.4.2.0
 ENV LINT_VERSION 3.4.21
 ENV LOCUST_VERSION 0.8
@@ -18,5 +17,4 @@ RUN export LANG=C; \
     yum install -y python-pip gcc-c++ && \
     yum clean all
 
-RUN pip install --upgrade pip=="${PIP_VERSION:?}" && \
-    pip install locust=="${LOCUST_VERSION:?}" pyzmq=="${PYZMQ_VERSION:?}"
+RUN pip install locust=="${LOCUST_VERSION:?}" pyzmq=="${PYZMQ_VERSION:?}"
