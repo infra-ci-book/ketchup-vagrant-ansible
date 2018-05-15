@@ -21,7 +21,7 @@ Ketchup_Sys_Deploy:
     - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_APP/virtualbox/private_key
     - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_NGINX_APP/virtualbox/private_key
     - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
-#    - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
+    - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
   script:
     - ansible-playbook -i ./hosts/ketchup/test_inventory ./site.yml -vv
   tags:
@@ -41,7 +41,7 @@ Ketchup_Performance_Test:
   artifacts:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
     paths:
-      - ./flexible_artifacts/sys_test*.log 
+      - ./flexible_artifacts/sys_test*.log
       - ./flexible_artifacts/sys_test*.csv
     expire_in: 1 day
     when: on_success
@@ -50,6 +50,6 @@ Ketchup_Performance_Test:
     - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_APP/virtualbox/private_key
     - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_NGINX_APP/virtualbox/private_key
     - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
-#    - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
+    - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
   tags:
     - docker
