@@ -1,0 +1,168 @@
+---
+stages:
+  - lint
+  - unit_prepare
+  - unit_test
+  - int_deploy
+  - int_test
+  - sys_deploy
+  - sys_test
+
+variables:
+  CONTAINER_IMAGE: c7-systemd
+  CONTAINER_IMAGE_PATH: ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CONTAINER_IMAGE}
+  GL_LOCUST_NAME: locust
+  GL_LOCUST_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}/${GL_LOCUST_NAME}
+
+Lint_Check_Master:
+  stage: lint
+  image:
+    name: irixjp/lint-rules:latest
+  script:
+    - ansible-playbook --syntax-check site.yml
+    - git clone https://github.com/infra-ci-book/lint-rules.git
+    - lint-rules/lint_master.sh
+  only:
+    - master
+  tags:
+    - docker
+
+Lint_Check_Branches:
+  stage: lint
+  image:
+    name: irixjp/lint-rules:latest
+  script:
+    - ansible-playbook --syntax-check site.yml
+    - git clone https://github.com/infra-ci-book/lint-rules.git
+    - lint-rules/lint_branches.sh
+  only:
+    - branches
+  except:
+    - master
+  tags:
+    - docker
+
+Unit_Package:
+  stage: unit_prepare
+  script:
+    - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
+    - docker build . -t ${CONTAINER_IMAGE_PATH}
+    - docker push ${CONTAINER_IMAGE_PATH}
+  tags:
+    - docker
+
+Ketchup_Unit_Test:
+  stage: unit_test
+  variables:
+    TARGET_APP: ketchup
+  services:
+    - name: ${CONTAINER_IMAGE_PATH}
+      alias: ${TARGET_APP}
+      entrypoint: ["/sbin/init"]
+  script:
+    - export CONTAINER_NAME="`hostname`-`echo ${CONTAINER_IMAGE_PATH}|sed -e 's/\//__/g' -e 's/\:[1-9a-z]\+//g'`-0"
+    - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${TARGET_APP} ./${TARGET_APP}.yml"
+    - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${TARGET_APP}_test.yml -vv"
+  tags:
+    - docker
+
+Ketchup_Nginx_Unit_Test:
+  stage: unit_test
+  variables:
+    TARGET_APP: ketchup_nginx
+  services:
+    - name: ${CONTAINER_IMAGE_PATH}
+      alias: ${TARGET_APP}
+      entrypoint: ["/sbin/init"]
+  script:
+    - export CONTAINER_NAME="`hostname`-`echo ${CONTAINER_IMAGE_PATH}|sed -e 's/\//__/g' -e 's/\:[1-9a-z]\+//g'`-0"
+    - docker exec ${CONTAINER_NAME} /bin/bash -c "ansible-playbook -i ./tests/inventory -l ${TARGET_APP} ./${TARGET_APP}.yml"
+    - docker exec ${CONTAINER_NAME} /bin/bash -c "cd ./tests; ansible-playbook -i ./inventory ./${TARGET_APP}_test.yml -vv"
+  tags:
+    - docker
+
+Ketchup_Int_Deploy:
+  stage: int_deploy
+  image:
+    name: irixjp/lint-rules:latest
+  variables:
+    VAGRANT_KEY_PATH: /root/vagrant/infraci/.vagrant/machines
+    KETCHUP_APP: test-ketchup
+    KETCHUP_NGINX_APP: test-ketchup-nginx
+  before_script:
+    - mkdir -pv ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox
+    - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_APP/virtualbox/private_key
+    - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_NGINX_APP/virtualbox/private_key
+    - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
+    - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
+  script:
+    - ansible-playbook -i ./hosts/ketchup/test_inventory ./site.yml -vv
+  tags:
+    - docker
+
+Ketchup_Nginx_Int_Test:
+  stage: int_test
+  image:
+    name: irixjp/lint-rules:latest
+  variables:
+    VAGRANT_KEY_PATH: /root/vagrant/infraci/.vagrant/machines
+    KETCHUP_APP: test-ketchup
+    KETCHUP_NGINX_APP: test-ketchup-nginx
+  before_script:
+    - mkdir -pv ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox
+    - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_APP/virtualbox/private_key
+    - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_NGINX_APP/virtualbox/private_key
+    - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
+  script:
+    - "cd ./tests; ansible-playbook -i ../hosts/ketchup/test_inventory ./int_test_ketchup_nginx.yml -vv"
+  after_script:
+    - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
+  tags:
+    - docker
+
+Ketchup_Sys_Deploy:
+  stage: sys_deploy
+  image:
+    name: irixjp/lint-rules:latest
+    entrypoint: [""]
+  variables:
+    VAGRANT_KEY_PATH: /root/vagrant/infraci/.vagrant/machines
+    KETCHUP_APP: test-ketchup
+    KETCHUP_NGINX_APP: test-ketchup-nginx
+  before_script:
+    - mkdir -pv ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox
+    - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_APP/virtualbox/private_key
+    - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_NGINX_APP/virtualbox/private_key
+    - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
+    - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
+  script:
+    - ansible-playbook -i ./hosts/ketchup/test_inventory ./site.yml -vv
+  tags:
+    - docker
+
+Ketchup_Performance_Test:
+  stage: sys_test
+  image:
+    name: ${GL_LOCUST_IMAGE}:devel
+  variables:
+    VAGRANT_KEY_PATH: /root/vagrant/infraci/.vagrant/machines
+    KETCHUP_APP: test-ketchup
+    KETCHUP_NGINX_APP: test-ketchup-nginx
+  script:
+    - cd ./flexible_artifacts
+    - ansible-playbook -i ../hosts/ketchup/test_inventory sys_test_locust.yml -vv
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
+    paths:
+      - ./flexible_artifacts/sys_test*.log
+      - ./flexible_artifacts/sys_test*.csv
+    expire_in: 1 day
+    when: on_success
+  after_script:
+    - mkdir -pv ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox
+    - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_APP/virtualbox/private_key
+    - echo "${VAGRANT_PRIVATE_KEY[@]:?}" > ${VAGRANT_KEY_PATH}/$KETCHUP_NGINX_APP/virtualbox/private_key
+    - chmod 400 ${VAGRANT_KEY_PATH}/{$KETCHUP_APP,$KETCHUP_NGINX_APP}/virtualbox/private_key
+    - ansible-playbook -i ./hosts/ketchup/test_inventory ./cleanup.yml -vv
+  tags:
+    - docker
