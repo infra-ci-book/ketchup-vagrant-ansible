@@ -28,5 +28,5 @@
     - name: Judge performance request
       assert:
         that:
-          - LC_NUM_CLIENTS <= lookup('csvfile', 'GET file=sys_test_requests.csv delimiter=, col=9')
+          - LC_NUM_CLIENTS <= lookup('csvfile', 'GET file=sys_test_requests.csv delimiter=, col=9')|int()
         msg: "Performance is degraded"
