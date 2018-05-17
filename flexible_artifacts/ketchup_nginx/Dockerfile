@@ -19,7 +19,7 @@ RUN rm -f "/lib/systemd/system/multi-user.target.wants/*"; \
     git clone "http://${GITLAB_IP}/root/${GITLAB_REPO}.git";
 
 WORKDIR /${GITLAB_REPO}
-RUN ansible-playbook -e 'artifact=containered' -e 'ketchup_host=ketchup' -i ./flexible_artifacts/hosts/ketchup/inventory -l "${TARGET_APP}" ./"${TARGET_APP}".yml
+RUN ansible-playbook -e 'artifact=containered' -i ./flexible_artifacts/hosts/ketchup/inventory -l "${TARGET_APP}" ./"${TARGET_APP}".yml
 
 WORKDIR /
 RUN rm -fr /"${GITLAB_REPO:?}"

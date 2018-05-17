@@ -21,7 +21,7 @@ Lint_Check:
     name: hadolint/hadolint
   script:
     - hadolint --ignore="SC2086" - < ./flexible_artifacts/${GL_KETCHUP_NAME}/Dockerfile
-    - hadolint --ignore="SC2086" - < ./flexible_artifacts/${GL_KETCHUP_NGINX_NAME}/Dockerfile
+    - hadolint - < ./flexible_artifacts/${GL_KETCHUP_NGINX_NAME}/Dockerfile
   tags:
     - docker
 
@@ -51,7 +51,6 @@ Unit_Test_Ketchup:
     name: irixjp/lint-rules:latest
     entrypoint: [""]
   script:
-    - yum install -y python-docker-py docker-client
     - cd ./flexible_artifacts/
     - ansible-playbook -i ./hosts/ketchup/inventory -t develop -e "KETCHUP_IMAGE=${GL_KETCHUP_IMAGE}" -e "KETCHUP_NGINX_IMAGE=${GL_KETCHUP_NGINX_IMAGE}" -e "IMAGE_VER=${BUILD_TAG}" ./manage_ketchup_app.yml -vv
     - cd ../tests/
@@ -69,7 +68,6 @@ Init_Deploy_Kethup:
     name: irixjp/lint-rules:latest
     entrypoint: [""]
   script:
-    - yum install -y python-docker-py
     - cd ./flexible_artifacts/
     - ansible-playbook -i ./hosts/ketchup/inventory -t develop -e "KETCHUP_IMAGE=${GL_KETCHUP_IMAGE}" -e "KETCHUP_NGINX_IMAGE=${GL_KETCHUP_NGINX_IMAGE}" -e "IMAGE_VER=${BUILD_TAG}" ./manage_ketchup_app.yml -vv
   after_script:
