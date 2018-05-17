@@ -17,4 +17,6 @@ RUN export LANG=C; \
     yum install -y python-pip gcc-c++ && \
     yum clean all
 
-RUN pip install locust=="${LOCUST_VERSION:?}" pyzmq=="${PYZMQ_VERSION:?}"
+RUN curl -O "https://bootstrap.pypa.io/get-pip.py" && \
+    python get-pip.py && \
+    pip install locust=="${LOCUST_VERSION:?}" pyzmq=="${PYZMQ_VERSION:?}"
