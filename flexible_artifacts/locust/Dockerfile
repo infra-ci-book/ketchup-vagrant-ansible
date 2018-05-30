@@ -5,6 +5,7 @@ ENV ANSIBLE_VERSION 2.4.2.0
 ENV LINT_VERSION 3.4.21
 ENV LOCUST_VERSION 0.8
 ENV PYZMQ_VERSION 17.0.0
+ENV GEVENT_VERSION 1.3.1
 
 COPY locustfile.py locustfile.py
 
@@ -14,9 +15,7 @@ RUN export LANG=C; \
     yum install -y git && \
     yum install -y "ansible-${ANSIBLE_VERSION:?}" && \
     yum install -y "ansible-lint-${LINT_VERSION:?}" && \
-    yum install -y python-pip gcc-c++ && \
+    yum install -y python2-pip gcc-c++ && \
     yum clean all
 
-RUN curl -O "https://bootstrap.pypa.io/get-pip.py" && \
-    python get-pip.py && \
-    pip install locust=="${LOCUST_VERSION:?}" pyzmq=="${PYZMQ_VERSION:?}"
+RUN pip install --disable-pip-version-check locust=="${LOCUST_VERSION}" pyzmq=="${PYZMQ_VERSION}" gevent=="${GEVENT_VERSION}"
