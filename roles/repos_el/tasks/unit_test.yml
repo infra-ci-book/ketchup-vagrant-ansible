@@ -29,5 +29,5 @@
       msg: EPEL is not enabled
       that:
         - "'epel' in test_registered_repos.stdout"
-    
+
   become: True
