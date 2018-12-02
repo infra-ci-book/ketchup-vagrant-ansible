@@ -23,4 +23,11 @@
       warn: no
     changed_when: false
     register: test_registered_repos
+
+  - name: Check epel is enabled
+    assert:
+      msg: EPEL is not enabled
+      that:
+        - "'epel' in test_registered_repos.stdout"
+    
   become: True
