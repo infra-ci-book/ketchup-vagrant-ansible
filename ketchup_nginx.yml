@@ -1,5 +1,5 @@
 ---
-- name: Install Ngnix frontend for Ketchup
+- name: Install Nginx frontend for Ketchup
   hosts: "ketchup_nginx"
   gather_facts: True
   roles:
