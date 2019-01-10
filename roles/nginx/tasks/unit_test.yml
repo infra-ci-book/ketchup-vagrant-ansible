@@ -23,7 +23,7 @@
     ignore_errors: true
     changed_when: false
 
-  - name: Check selinux permission for Ngnix
+  - name: Check selinux permission for Nginx
     assert:
       that:
         - "'on' in test_getsebool.stdout|default('on')"
