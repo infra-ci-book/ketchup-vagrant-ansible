@@ -17,7 +17,7 @@
     ignore_errors: true
     changed_when: false
 
-  - name: Getting selinux permission for Ngnix
+  - name: Getting selinux permission for Nginx
     command: getsebool httpd_can_network_connect
     register: test_getsebool
     ignore_errors: true
@@ -43,13 +43,13 @@
         - "test_nginx_conf.changed|bool == 0"
       msg: "Nginx configuration is differ from templates. {{ test_nginx_conf.diff|default('') }}"
 
-  - name: Check disable default.conf for Ngnix
+  - name: Check disable default.conf for Nginx
     wait_for:
       path: /etc/nginx/conf.d/default.conf
       state: absent
       timeout: 5
 
-  - name: DryRun install ketchup.conf for Ngnix
+  - name: DryRun install ketchup.conf for Nginx
     template:
       src: 'ketchup.conf.j2'
       dest: '{{ nginx_conf_dir }}/ketchup.conf'
