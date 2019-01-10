@@ -7,7 +7,7 @@
     - role: cleanup_ketchup
 
 
-- name: Cleanup Ngnix frontend for Ketchup
+- name: Cleanup Nginx frontend for Ketchup
   hosts: "ketchup_nginx"
   roles:
     - role: cleanup_nginx
