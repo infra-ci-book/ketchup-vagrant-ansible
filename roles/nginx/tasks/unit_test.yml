@@ -57,7 +57,7 @@
     diff: true
     register: test_nginx_ketchup_conf
 
-  - name: Check ketchup.conf for Ngnix
+  - name: Check ketchup.conf for Nginx
     assert:
       that:
         - "test_nginx_ketchup_conf.changed|bool == 0"
