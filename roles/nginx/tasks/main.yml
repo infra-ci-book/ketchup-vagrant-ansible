@@ -17,7 +17,7 @@
     ignore_errors: true
     changed_when: false
 
-  - name: Grant selinux permission for Ngnix
+  - name: Grant selinux permission for Nginx
     seboolean:
       name: '{{item}}'
       persistent: yes
@@ -32,7 +32,7 @@
       dest: /etc/nginx/nginx.conf
       backup: yes
 
-  - name: Install ketchup.conf for Ngnix
+  - name: Install ketchup.conf for Nginx
     template:
       src: 'ketchup.conf.j2'
       dest: '{{ nginx_conf_dir }}/ketchup.conf'
