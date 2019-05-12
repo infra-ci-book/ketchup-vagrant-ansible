@@ -3,6 +3,7 @@ FROM centos:7
 ENV container docker
 ENV ANSIBLE_VERSION 2.4.2.0
 ENV ANSIBLE_LINT_VERSION 3.4.21
+ENV ANSIBLE_LINT_RPM https://github.com/infra-ci-book/support/raw/master/obsoleted/ansible-lint-3.4.21-1.el7.centos.noarch.rpm
 
 COPY ./ ./
 
@@ -18,7 +19,7 @@ RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \
     yum install -y epel-release && \
     yum install -y git && \
     yum install -y ansible-${ANSIBLE_VERSION:?} && \
-    yum install -y ansible-lint-${ANSIBLE_LINT_VERSION:?} && \
+    yum install -y ${ANSIBLE_LINT_RPM:?} && \
     yum clean all
 
 VOLUME ["/sys/fs/cgroup","/bin"]
